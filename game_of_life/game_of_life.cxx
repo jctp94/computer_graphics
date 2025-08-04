@@ -90,8 +90,6 @@ void savePBM(const std::string& filename, int width, int height, FrameBuffer& fb
 
     for (int row = 0; row < height; ++row) {
         for (int col = 0; col < width; ++col) {
-            if(*fb(row,col) ==  1)
-                std::cout << "value 1 " << *fb(row,col) << row <<"--"<<  col<<std::endl;
             file << ((*fb(row, col) != 0) ? "1 " : "0 ");
         }
         file << "\n";
@@ -132,7 +130,6 @@ void read_file(std::string path)
     }
 
     file.close();  // optional; file will close when `file` goes out of scope
-    std::cout << fb << std::endl;
 }
 
 

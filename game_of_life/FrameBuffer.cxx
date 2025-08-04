@@ -51,7 +51,6 @@ allocate( const TNatural& w, const TNatural& h )
   this->m_B
     =
     reinterpret_cast< TReal* >( std::calloc( w * h, sizeof( TReal ) ) );
-    std::cout << "This is m_B " << *m_B << std::endl;
   this->fill( 0 );
 }
 
@@ -96,7 +95,6 @@ fill( const TReal& a, const TReal& b, const TReal& c )
 void FrameBuffer::
 fill( const TReal& a )
 {
-  std::cout<< "bien" << std::endl;
   TNatural s = this->m_W * this->m_H;
   for( TNatural i = 0; i < s; ++i )
   {
