@@ -5,6 +5,7 @@
 #include "FrameBuffer.h"
 #include <cmath>
 #include <cstring>
+#include <iostream>
 
 // -------------------------------------------------------------------------
 FrameBuffer::
@@ -27,8 +28,8 @@ FrameBuffer( const EMode& m )
   else // if( this->m_M == Self::RGB )
     this->m_C = []( TChannel* c, const TReal* v ) -> void
       {
-        for( TNatural i = 0; i < 3; ++i )
-          c[ i ] = TChannel( v[ i ] * Self::s_M );
+          c[ 0 ] = TChannel( v[ 0 ] * Self::s_M );
+          
       };
 }
 
@@ -49,8 +50,9 @@ allocate( const TNatural& w, const TNatural& h )
   this->m_H = h;
   this->m_B
     =
-    reinterpret_cast< TReal* >( std::calloc( w * h * 3, sizeof( TReal ) ) );
-  this->fill( 0, 0, 0 );
+    reinterpret_cast< TReal* >( std::calloc( w * h, sizeof( TReal ) ) );
+    std::cout << "This is m_B " << *m_B << std::endl;
+  this->fill( 0 );
 }
 
 // -------------------------------------------------------------------------
@@ -70,6 +72,14 @@ width( ) const
 }
 
 // -------------------------------------------------------------------------
+const FrameBuffer::
+TReal* FrameBuffer::
+buffer( ) const
+{
+  return( this->m_B );
+}
+
+// -------------------------------------------------------------------------
 void FrameBuffer::
 fill( const TReal& a, const TReal& b, const TReal& c )
 {
@@ -81,6 +91,19 @@ fill( const TReal& a, const TReal& b, const TReal& c )
     this->m_B[ i + 2 ] = c;
   } // end for
 }
+
+// -------------------------------------------------------------------------
+void FrameBuffer::
+fill( const TReal& a )
+{
+  std::cout<< "bien" << std::endl;
+  TNatural s = this->m_W * this->m_H;
+  for( TNatural i = 0; i < s; ++i )
+  {
+    this->m_B[ i ] = a;
+  } // end for
+}
+
 
 // -------------------------------------------------------------------------
 FrameBuffer::
@@ -95,7 +118,7 @@ operator()( const TNatural& i, const TNatural& j, const TNatural& c )
     this->m_B != nullptr
     )
   {
-    TNatural idx = ( this->m_W * 3 * i ) + ( j * 3 ) + c;
+    TNatural idx = ( this->m_W * i ) + ( j ) + c;
     return( this->m_B[ idx ] );
   }
   else
@@ -118,7 +141,7 @@ operator()( const TNatural& i, const TNatural& j, const TNatural& c ) const
     this->m_B != nullptr
     )
   {
-    TNatural idx = ( this->m_W * 3 * i ) + ( j * 3 ) + c;
+    TNatural idx = ( this->m_W * i ) + ( j ) + c;
     return( this->m_B[ idx ] );
   }
   else
@@ -182,20 +205,21 @@ _to_stream( std::ostream& o ) const
 
   TNatural s = this->m_W * this->m_H;
   TReal* b = this->m_B;
-  TChannel c[ 3 ];
+  TChannel c[ 1 ];
+    
+  std::cout << "this is c" << c[0] << "end c"<< std::endl;
 
-  for( TNatural i = 0; i < s; ++i, b += 3 )
+  for( TNatural i = 0; i < s; ++i, ++b)
   {
     if( i % this->m_W == 0 )
       o << std::endl;
     else
-      o << "    ";
-    this->m_C( c, b );
+      o << " ";
     o
-      << TInteger( c[ 0 ] ) << " "
-      << TInteger( c[ 1 ] ) << " "
-      << TInteger( c[ 2 ] );
+      << *b << " ";
   } // end for
+    
+
 }
 
 // eof - FrameBuffer.cxx

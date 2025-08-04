@@ -38,8 +38,10 @@ public:
 
   const TNatural& height( ) const;
   const TNatural& width( ) const;
+  const TReal* buffer( ) const;
 
   void fill( const TReal& a, const TReal& b, const TReal& c );
+  void fill( const TReal& a);
 
   TReal& operator()(
     const TNatural& i, const TNatural& j, const TNatural& c
@@ -63,7 +65,7 @@ protected:
 
   TColorFunction m_C;
 
-  static constexpr TReal s_M = TReal( std::numeric_limits< TChannel >::max( ) );
+  static constexpr TReal s_M = 1;
 
 public:
   friend std::ostream& operator<<( std::ostream& o, const FrameBuffer& b )
