@@ -19,6 +19,7 @@ public:
   using TInteger = std::int32_t;
   using TReal    = float;
   using TChannel = std::uint8_t;
+  using TBool    = bool;
 
   using TColorFunction = std::function< void( TChannel*, const TReal* ) >;
 

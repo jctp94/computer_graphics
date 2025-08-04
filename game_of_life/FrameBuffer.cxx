@@ -159,7 +159,7 @@ operator()( const TNatural& i, const TNatural& j )
     this->m_B != nullptr
     )
   {
-    TNatural idx = ( this->m_W * 3 * i ) + ( j * 3 );
+    TNatural idx = ( this->m_W * i ) + ( j);
     return( this->m_B + idx );
   }
   else
@@ -177,7 +177,7 @@ operator()( const TNatural& i, const TNatural& j ) const
     this->m_B != nullptr
     )
   {
-    TNatural idx = ( this->m_W * 3 * i ) + ( j * 3 );
+    TNatural idx = ( this->m_W * i ) + ( j );
     return( this->m_B + idx );
   }
   else
@@ -198,16 +198,13 @@ void FrameBuffer::
 _to_stream( std::ostream& o ) const
 {
   o
-    << "P3" << std::endl
+    << "P1" << std::endl
     << "# FrameBuffer" << std::endl
-    << this->m_W << " " << this->m_H << std::endl
     << TNatural( std::numeric_limits< TChannel >::max( ) );
 
   TNatural s = this->m_W * this->m_H;
   TReal* b = this->m_B;
   TChannel c[ 1 ];
-    
-  std::cout << "this is c" << c[0] << "end c"<< std::endl;
 
   for( TNatural i = 0; i < s; ++i, ++b)
   {
