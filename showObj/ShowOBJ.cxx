@@ -52,11 +52,6 @@ public:
       )
     { 
       this->m_Camera.setIdentity( );
-      // this->m_Camera( 2, 3 ) = 1.3;
-      // this->m_Camera( 1, 2 ) = -2;
-      // this->m_Camera( 0, 0 ) = 0.1;
-      // this->m_Camera( 1, 1 ) = 0.1;
-      // this->m_Camera( 2, 2 ) = 0.1;
 
       this->m_Mesh.read_from_OBJ( argv[ 1 ] );
       const float* bb = m_Mesh.bounding_box(); // {minX, maxX, minY, maxY, minZ, maxZ}
@@ -67,6 +62,7 @@ public:
 
       // rotar sobre el centro del objeto                             
       // m_Pivot = pivot;
+      this->view = argv[ 2 ] ? argv[ 2 ] : "ortho";
     }
 
   virtual ~MyApp( ) override
@@ -103,21 +99,24 @@ protected:
       float top   = g_near * std::tan(0.5f * fovy);
       float right = top * aspect;
 
-      // glOrtho( left, right, bottom, up, near, far );
-      // glFrustum( left, right, bottom, up, near, far );
-      // gluPerspective( fovy, aspect, near, far );
-      // Opción ortográfica segura:
+      if (this->view == "ortho") {
+        // glOrtho( left, right, bottom, up, near, far );
+        std::cout << "Using ortho" << std::endl;
+        glOrtho(-2, 2, -2, 2, -2, 2);
+      } else if (this->view == "frustum") {
+        // glFrustum( left, right, bottom, up, near, far );
+        glFrustum(-right, right, -top, top, g_near, g_far);
+        glTranslatef(0, 0, -1);
 
-      // glOrtho(-2, 2, -2, 2, -10, 10);
-      // glOrtho( -2, 2, -2, 2, -2, 2 );
-      // glFrustum( -1, 1, -1, 1, 1e-1, 2 );
-      // glFrustum( -20, 20, -20, 20, 1e-2, 5 );
-      gluPerspective(g_fovy_deg, a, g_near, g_far);
-      glTranslatef(0, 0, -5);
-      // this->m_Camera( 3, 3 ) += 1.2;
+      } else if (this->view == "perspective") {
+        // gluPerspective( fovy, aspect, near, far );
+        gluPerspective(g_fovy_deg, a, g_near, g_far);
+        glTranslatef(0, 0, -5);
+      }
+
+
       glMatrixMode(GL_MODELVIEW); 
       this->m_Camera.setIdentity();
-      this->m_Camera(2, 3) = 0.0;
       glutPostRedisplay( );
     }
   virtual void _cb_display( ) override
@@ -177,7 +176,6 @@ protected:
         static const TReal a = std::atan( TReal( 1 ) ) / TReal( 45 );
         static const TReal ca = std::cos( a );
         static const TReal sa = std::sin( a );
-        std::cout << "TEST" << std::endl;
 
         TMatrix R = TMatrix::Identity( );
 
@@ -285,6 +283,7 @@ protected:
   int lastY;
   unsigned char m_Axis { 'y' };
   PUJ_GL::Mesh m_Mesh;
+  std::string view;
 };
 
 int main( int argc, char** argv )
