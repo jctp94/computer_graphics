@@ -19,7 +19,6 @@ public:
   using TReal = PUJ_GL::Mesh::TReal;
   using TMatrix = Eigen::Matrix< TReal, 4, 4 >;
   static TMatrix Tfrom(const Eigen::Matrix<TReal,3,1>& t) {
-    std::cout << "Tfrom: " << t << std::endl;
     TMatrix T = TMatrix::Identity();
     // 1 0 0 t(0)
     // 0 1 0 t(1)
@@ -93,7 +92,6 @@ protected:
       
       float aspect = (height > 0) ? float(width)/float(height) : 1.0f;
       float fovy   = g_fovy_deg * float(M_PI) / 180.0f;
-      std::cout << "fovy radianes: " << fovy << std::endl;
 
       // Deriva “top” y “right” en el plano near a partir del FOV
       float top   = g_near * std::tan(0.5f * fovy);
@@ -101,7 +99,6 @@ protected:
 
       if (this->view == "ortho") {
         // glOrtho( left, right, bottom, up, near, far );
-        std::cout << "Using ortho" << std::endl;
         glOrtho(-2, 2, -2, 2, -2, 2);
       } else if (this->view == "frustum") {
         // glFrustum( left, right, bottom, up, near, far );
@@ -228,18 +225,13 @@ protected:
     {
       this->lastX = x;
       this->lastY = y;
-      std::cout << "Mouse: " << button << " " << state << " " << x << " " << y << std::endl;
     }
 
   virtual void _cb_motion( int x, int y ) override
     { 
       static const TReal a = std::atan( TReal( 1 ) ) / TReal( 10 );
-
-      std::cout << "inside motion" << std::atan( TReal( 1 ) ) << std::endl;
-      std::cout << "a value: " << a << std::endl;
       static const TReal ca = std::cos( a );
       static const TReal sa = std::sin( a );
-      std::cout << "TEST1" << std::endl;
 
       int sgnY = (y > lastY) ? +1 : (y < lastY ? -1 : 0);
       if (sgnY != 0) {
@@ -273,8 +265,6 @@ protected:
       glutPostRedisplay( );
       this->lastX = x;
       this->lastY = y;
-      std::cout << "Motion: " << x << " " << y << std::endl; 
-
     }
 
 protected:
