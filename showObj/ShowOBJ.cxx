@@ -225,6 +225,22 @@ protected:
     {
       this->lastX = x;
       this->lastY = y;
+      if( button == 3 && state == GLUT_DOWN ) // scroll up
+      {
+        // acercar
+        TReal s = TReal(1.1);
+        TMatrix S = Sfrom(s);
+        this->m_Camera = Tfrom(m_Pivot) * S * Tfrom(-m_Pivot) * this->m_Camera;
+        glutPostRedisplay( );
+      }
+      else if( button == 4 && state == GLUT_DOWN ) // scroll down
+      {
+        // alejar
+        TReal s = TReal(1.0/1.1);
+        TMatrix S = Sfrom(s);
+        this->m_Camera = Tfrom(m_Pivot) * S * Tfrom(-m_Pivot) * this->m_Camera;
+        glutPostRedisplay( );
+      }
     }
 
   virtual void _cb_motion( int x, int y ) override
