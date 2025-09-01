@@ -25,11 +25,13 @@ namespace PUJ_GL
     const TReal* bounding_box( ) const;
     bool read_from_OBJ( const std::string& fname );
     void draw( );
-
-  protected:
+    const std::vector<TReal>& points() const { return m_Points; }
+    std::size_t num_vertices() const { return m_Points.size() / 3; }
+    
+    protected:
     TReal m_Color[ 3 ];
-    TReal m_BoundingBox[ 6 ];
     std::vector< TReal >    m_Points;
+    TReal m_BoundingBox[ 6 ];
     std::vector< TNatural > m_Edges;
     std::vector< TNatural > m_Triangles;
     std::vector< TNatural > m_Quads;

@@ -18,6 +18,26 @@ public:
 
   using TReal = PUJ_GL::Mesh::TReal;
   using TMatrix = Eigen::Matrix< TReal, 4, 4 >;
+  static TMatrix Tfrom(const Eigen::Matrix<TReal,3,1>& t) {
+    std::cout << "Tfrom: " << t << std::endl;
+    TMatrix T = TMatrix::Identity();
+    // 1 0 0 t(0)
+    // 0 1 0 t(1)
+    // 0 0 1 t(2)
+    // 0 0 0 1
+    T(0,3) = t(0); T(1,3) = t(1); T(2,3) = t(2);
+    return T;
+  }
+  static TMatrix Sfrom(TReal s) {
+    TMatrix S = TMatrix::Identity();
+    S(0,0) = S(1,1) = S(2,2) = s;
+    return S;
+  }
+  float g_fovy_deg = 45.0f;    // FOV vertical en grados
+  float g_near     = 0.1f;     // plano cercano (positivo)
+  float g_far      = 1000.0f;
+  
+  Eigen::Matrix<TReal,3,1> m_Pivot { 0, 0, 0 };
 
 public:
   MyApp(
@@ -30,9 +50,23 @@ public:
       GLUT_DOUBLE | GLUT_RGB,
       w, h, x, y, "Show OBJ models"
       )
-    {
+    { 
       this->m_Camera.setIdentity( );
+      // this->m_Camera( 2, 3 ) = 1.3;
+      // this->m_Camera( 1, 2 ) = -2;
+      // this->m_Camera( 0, 0 ) = 0.1;
+      // this->m_Camera( 1, 1 ) = 0.1;
+      // this->m_Camera( 2, 2 ) = 0.1;
+
       this->m_Mesh.read_from_OBJ( argv[ 1 ] );
+      const float* bb = m_Mesh.bounding_box(); // {minX, maxX, minY, maxY, minZ, maxZ}
+      // Code to calculate the center of the object and assign it to the pivot
+      // Eigen::Vector3f pivot( (bb[0]+bb[1])*0.5f,
+      //                        (bb[2]+bb[3])*0.5f,
+      //                        (bb[4]+bb[5])*0.5f );
+
+      // rotar sobre el centro del objeto                             
+      // m_Pivot = pivot;
     }
 
   virtual ~MyApp( ) override
@@ -42,8 +76,10 @@ public:
   virtual void init( ) override
     {
       this->Superclass::init( );
-
+      
       glClearColor( 0.0, 0.0, 0.0, 1.0 );
+      glEnable(GL_DEPTH_TEST);
+
     }
 
 protected:
@@ -58,21 +94,38 @@ protected:
 
       glMatrixMode( GL_PROJECTION );
       glLoadIdentity( );
+      
+      float aspect = (height > 0) ? float(width)/float(height) : 1.0f;
+      float fovy   = g_fovy_deg * float(M_PI) / 180.0f;
+      std::cout << "fovy radianes: " << fovy << std::endl;
+
+      // Deriva “top” y “right” en el plano near a partir del FOV
+      float top   = g_near * std::tan(0.5f * fovy);
+      float right = top * aspect;
 
       // glOrtho( left, right, bottom, up, near, far );
       // glFrustum( left, right, bottom, up, near, far );
       // gluPerspective( fovy, aspect, near, far );
+      // Opción ortográfica segura:
 
+      // glOrtho(-2, 2, -2, 2, -10, 10);
+      // glOrtho( -2, 2, -2, 2, -2, 2 );
+      // glFrustum( -1, 1, -1, 1, 1e-1, 2 );
+      // glFrustum( -20, 20, -20, 20, 1e-2, 5 );
+      gluPerspective(g_fovy_deg, a, g_near, g_far);
+      glTranslatef(0, 0, -5);
+      // this->m_Camera( 3, 3 ) += 1.2;
+      glMatrixMode(GL_MODELVIEW); 
+      this->m_Camera.setIdentity();
+      this->m_Camera(2, 3) = 0.0;
       glutPostRedisplay( );
     }
   virtual void _cb_display( ) override
     {
-      glClear( GL_COLOR_BUFFER_BIT );
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       glMatrixMode( GL_MODELVIEW );
       glLoadIdentity( );
-
-      glMultMatrixf( this->m_Camera.data( ) );
 
       // Show the global orthogonal base
       glBegin( GL_LINES );
@@ -91,9 +144,13 @@ protected:
       }
       glEnd( );
 
+      glPushMatrix( );
+      glMultMatrixf( this->m_Camera.data( ) );
+
+
       // Show mesh
       this->m_Mesh.draw( );
-
+      glPopMatrix( );
       glutSwapBuffers( );
     }
 
@@ -111,13 +168,19 @@ protected:
       {
         this->m_Axis = 'z';
       }
+      else if( key == 'f' || key == 'F' )
+      {
+        this->m_Axis = 'f';
+      }
       else if( key == '+' || key == '-' )
       {
         static const TReal a = std::atan( TReal( 1 ) ) / TReal( 45 );
         static const TReal ca = std::cos( a );
         static const TReal sa = std::sin( a );
+        std::cout << "TEST" << std::endl;
 
         TMatrix R = TMatrix::Identity( );
+
         if( this->m_Axis == 'x' )
         {
           R( 1, 1 ) = R( 2, 2 ) = ca;
@@ -138,20 +201,88 @@ protected:
           R( 0, 1 ) = R( 1, 0 ) = sa;
           if     ( key == '+' ) R( 0, 1 ) *= TReal( -1 );
           else if( key == '-' ) R( 1, 0 ) *= TReal( -1 );
-        } // end if
-        this->m_Camera.transpose( ) *= R.transpose( );
+        }
+        else if (this->m_Axis == 'f') {
+          // factor incremental: acercar = 1.1, alejar = 1/1.1
+          TReal s = (key == '+') ? TReal(1.1) : TReal(1.0/1.1);
+        
+          // Zoom en ejes fijos (mundo): pre-multiplico con el sándwich T(p)*S*T(-p)
+          TMatrix S = Sfrom(s);
+          this->m_Camera = Tfrom(m_Pivot) * S * Tfrom(-m_Pivot) * this->m_Camera;
+        
+          glutPostRedisplay();
+          return; // opcional: para no pasar al bloque de rotación
+        }
+
+        this->m_Camera = Tfrom(m_Pivot) * R * Tfrom(-m_Pivot) * this->m_Camera;
 
         glutPostRedisplay( );
       }
       else if( key == 'r' || key == 'R' )
       {
-        this->m_Camera.setIdentity( );
+        this->m_Camera.setIdentity();
+        this->m_Camera(2, 3) = 0.0;
         glutPostRedisplay( );
       } // end if
+    }
+  
+  virtual void _cb_mouse( int button, int state, int x, int y ) override
+    {
+      this->lastX = x;
+      this->lastY = y;
+      std::cout << "Mouse: " << button << " " << state << " " << x << " " << y << std::endl;
+    }
+
+  virtual void _cb_motion( int x, int y ) override
+    { 
+      static const TReal a = std::atan( TReal( 1 ) ) / TReal( 10 );
+
+      std::cout << "inside motion" << std::atan( TReal( 1 ) ) << std::endl;
+      std::cout << "a value: " << a << std::endl;
+      static const TReal ca = std::cos( a );
+      static const TReal sa = std::sin( a );
+      std::cout << "TEST1" << std::endl;
+
+      int sgnY = (y > lastY) ? +1 : (y < lastY ? -1 : 0);
+      if (sgnY != 0) {
+          TMatrix R = TMatrix::Identity();
+          R(1,1) =  ca;      R(1,2) = -sgnY * sa;
+          R(2,1) =  sgnY*sa; R(2,2) =  ca;
+          // this->m_Camera = this->m_Camera * R;   // o R * m_Camera si usas “vista”
+          this->m_Camera = Tfrom(m_Pivot) * R * Tfrom(-m_Pivot) * this->m_Camera;
+      }
+      // 1 0 0 0
+      // 0 ca -sa 0
+      // 0 sa ca 0
+      // 0 0 0 1
+      // this->m_Camera.transpose( ) *= R.transpose( );
+
+      int sgnX = (x > lastX) ? +1 : (x < lastX ? -1 : 0);
+      if (sgnX != 0) {
+          TMatrix R = TMatrix::Identity();
+          R(0,0) =  ca;      R(0,2) =  sgnX*sa;
+          R(2,0) = -sgnX*sa; R(2,2) =  ca;
+          // this->m_Camera = this->m_Camera * R;   // o R * m_Camera
+          // this->m_Camera = this->m_Camera * Tfrom(m_Pivot) * R * Tfrom(-m_Pivot);
+          this->m_Camera = Tfrom(m_Pivot) * R * Tfrom(-m_Pivot) * this->m_Camera;
+      }
+
+      //ca 0 sa 0
+      // 0 1 0 0
+      // -sa 0 ca 0
+      // 0 0 0 1
+      // this->m_Camera.transpose( ) *= R.transpose( );
+      glutPostRedisplay( );
+      this->lastX = x;
+      this->lastY = y;
+      std::cout << "Motion: " << x << " " << y << std::endl; 
+
     }
 
 protected:
   TMatrix m_Camera;
+  int lastX;
+  int lastY;
   unsigned char m_Axis { 'y' };
   PUJ_GL::Mesh m_Mesh;
 };
