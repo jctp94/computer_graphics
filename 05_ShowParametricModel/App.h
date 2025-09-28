@@ -22,7 +22,7 @@ public:
   App(
     int* argc, char** argv,
     int w = 500, int h = 500,
-    int x = 50, int y = 50
+    int x = 10, int y = 10
     );
   virtual ~App( ) override;
 

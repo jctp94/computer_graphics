@@ -191,6 +191,28 @@ set_image( PUJ_GL::Image* image )
 void PUJ_GL::Mesh::
 draw( )
 {
+  // GLfloat material_color[] = { 0.0, 0.8, 0.0 , 1.0 };
+  // GLfloat specular_color[] = { 0.0, 0.0, 0.9 , 1.0 };
+  // // glMaterialfv( GL_FRONT, GL_DIFFUSE, material_color );
+  // glMaterialf( GL_FRONT, GL_SHININESS, 15 );
+  // glMaterialfv( GL_FRONT, GL_SPECULAR, specular_color );
+  
+
+  //       mesh->set_material_ambient(0.2f, 0.2f, 0.2f);
+  //     mesh->set_material_diffuse(0.8f, 0.8f, 0.8f);
+  //     mesh->set_material_specular(1.0f, 1.0f, 1.0f);
+  //     mesh->set_material_shininess(50.0f);
+
+  GLfloat ambient_color[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+  GLfloat specular_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  GLfloat diffuse_color[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+  GLfloat shininess = 50.0f;
+
+
+  glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient_color );
+  glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, specular_color );
+  glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, diffuse_color );
+  glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, shininess);
   const TReal* v = this->m_Vertices;
   const TReal* n = this->m_Normals;
   const TReal* t = this->m_Textures;
