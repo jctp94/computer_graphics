@@ -44,7 +44,8 @@ App(
 
   this->m_Scene.load_parametric_model(
     parametric_model,
-    -0.5, 0.5, 10, false, -0.5, 0.5, 10, false,
+    // -3.14, 3.14, 170, false, -3.14, 3.14, 170, false,
+    -0.5, 0.5, 175, false, -0.5, 0.5, 175, false,
     image
     );
 
@@ -65,6 +66,21 @@ init( )
   this->Superclass::init( );
   const TReal* c = this->m_Scene.clear_color( );
   glClearColor( c[ 0 ], c[ 1 ], c[ 2 ], c[ 3 ] );
+  
+
+  glEnable( GL_DEPTH_TEST );
+  glDepthFunc( GL_SMOOTH );
+
+  glEnable( GL_LIGHTING );
+  glEnable( GL_LIGHT0 );
+
+  GLfloat light_pos[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+  glLightfv( GL_LIGHT0, GL_POSITION, light_pos );
+  GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+
+  glEnable( GL_COLOR_MATERIAL );
+  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 }
 
 // -------------------------------------------------------------------------
