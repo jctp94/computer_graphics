@@ -1,0 +1,4 @@
+/home/jc/Repositories/computer_graphics/05_ShowParametricModel/build/CMakeFiles/PUJ_GL.dir
+/home/jc/Repositories/computer_graphics/05_ShowParametricModel/build/CMakeFiles/PUJ_GL_ShowParametricModel.dir
+/home/jc/Repositories/computer_graphics/05_ShowParametricModel/build/CMakeFiles/edit_cache.dir
+/home/jc/Repositories/computer_graphics/05_ShowParametricModel/build/CMakeFiles/rebuild_cache.dir
