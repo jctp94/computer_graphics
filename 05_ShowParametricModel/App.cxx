@@ -95,84 +95,47 @@ App::
 }
 
 // -------------------------------------------------------------------------
-void App::
-init( )
-// {
-//   this->Superclass::init( );
-//   const TReal* c = this->m_Scene.clear_color( );
-//   glClearColor( c[ 0 ], c[ 1 ], c[ 2 ], c[ 3 ] );
-  
-//   glEnable( GL_DEPTH_TEST );
-//   // glDepthFunc( GL_SMOOTH );
-//   glEnable( GL_LIGHTING );
-//   glEnable( GL_LIGHT0 );
-//   // glShadeModel( GL_SMOOTH ); // Sombreado suave
-
-//   GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
-//   GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-//   GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-//   GLfloat light_pos[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-
-//   glLightfv( GL_LIGHT0, GL_POSITION, light_pos );
-//   // glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diffuse );
-//   // glLightfv( GL_LIGHT0, GL_SPECULAR, light_specular );
-//   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-
-
-
-
-//   // glEnable( GL_COLOR_MATERIAL );
-//   // glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-// }
+void App::init()
 {
-// Call the parent class's init method to perform any base initialization.
-  this->Superclass::init( );
+  // Inicialización base
+  this->Superclass::init();
 
-// Get the clear color (background color) from the scene.
-  const TReal* c = this->m_Scene.clear_color( );
+  // Color de fondo de la escena
+  const TReal* c = this->m_Scene.clear_color();
+  glClearColor(c[0], c[1], c[2], c[3]);
 
-// Set the OpenGL clear color using the scene's clear color values.
-  glClearColor( c[ 0 ], c[ 1 ], c[ 2 ], c[ 3 ] );
-
-// Set the display mode to use double buffering, RGB color, and depth buffer.
+  // Buffer y z-buffer
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-
-// Enable depth testing for correct 3D rendering.
   glEnable(GL_DEPTH_TEST);
-
-// Set the depth comparison function to "less", so closer objects are rendered in front.
   glDepthFunc(GL_LESS);
-
-// Set the depth buffer clear value to the farthest depth.
   glClearDepth(1.0f);
 
-// Enable lighting calculations in OpenGL.
+  // Luz y shading
   glEnable(GL_LIGHTING);
-
-// Enable the first light source (GL_LIGHT0).
   glEnable(GL_LIGHT0);
 
-// Define the position of the light source.
-  GLfloat light_pos[] = {0.0f, 0.0f, 1.0f, 2.0f};
+  // Configuración de la luz (blanca)
+  GLfloat L_amb[]  = {0.55f, 0.55f, 0.55f, 1.0f};
+  GLfloat L_dif[]  = {0.85f, 0.85f, 0.85f, 1.0f};
+  GLfloat L_spec[] = {1.00f, 1.00f, 1.00f, 1.0f};
+  glLightfv(GL_LIGHT0, GL_AMBIENT,  L_amb);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE,  L_dif);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, L_spec);
 
-// Set the position of GL_LIGHT0.
-  glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-
-// Define the ambient light color.
-  GLfloat ambient[] = {1.0, 1.0, 1.0, 5.0};
-
-// Set the ambient light property for GL_LIGHT0.
-  glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-
-// Enable color tracking for material properties.
+  // Hacemos que glColor afecte el material
   glEnable(GL_COLOR_MATERIAL);
-
-// Set color material mode to affect both ambient and diffuse properties for front and back faces.
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-// Set the shading model to smooth shading (Gouraud shading).
-  glShadeModel(GL_SMOOTH); 
+  // Especularidad del material
+  GLfloat M_spec[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, M_spec);
+  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 32.0f);
+
+  // Sombreado suave y normalización
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_NORMALIZE);
 }
+
  
 
 // -------------------------------------------------------------------------
@@ -202,16 +165,21 @@ _cb_display( )
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
 
-  this->m_Camera.look( );
 
-  // Ubicar la luz relativa a la cámara (con offset para evitar coincidencia con origen)
-  // GLfloat light_position[] = { 0.0f, 0.0f, 1.0f, 1.0f };  // Luz posicional ligeramente elevada
-  // glLightfv( GL_LIGHT0, GL_POSITION, light_position );
+  GLfloat light_position[] = {2.0f, 3.0f, 1.0f, 1.0f};
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-  this->m_Scene.draw( );
-  glutSwapBuffers( );
+  // 🎨 Cambiar dinámicamente el color de la luz DIFUSA (ej. roja)
+  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 0.0f};  // rojo intenso
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, L_dif);
+  
+  this->m_Camera.look();              // deja lista la modelview (vista)
+
+  // Ahora sí: posiciona la luz en espacio de cámara
+
+  this->m_Scene.draw();
+  glutSwapBuffers();
 }
-
 // -------------------------------------------------------------------------
 void App::
 _cb_mouse( int button, int state, int x, int y )
