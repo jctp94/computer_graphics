@@ -115,7 +115,7 @@ void App::init()
   glEnable(GL_LIGHT0);
 
   // Configuración de la luz (blanca)
-  GLfloat L_amb[]  = {0.55f, 0.55f, 0.55f, 1.0f};
+  GLfloat L_amb[]  = {0.15f, 0.15f, 0.15f, 1.0f};
   GLfloat L_dif[]  = {0.85f, 0.85f, 0.85f, 1.0f};
   GLfloat L_spec[] = {1.00f, 1.00f, 1.00f, 1.0f};
   glLightfv(GL_LIGHT0, GL_AMBIENT,  L_amb);
@@ -166,11 +166,11 @@ _cb_display( )
   glLoadIdentity( );
 
 
-  GLfloat light_position[] = {2.0f, 3.0f, 1.0f, 1.0f};
+  GLfloat light_position[] = {0.0f, 0.0f, -2.0f, 1.0f};
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   // 🎨 Cambiar dinámicamente el color de la luz DIFUSA (ej. roja)
-  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 0.0f};  // rojo intenso
+  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 0.3f};  // rojo intenso
   glLightfv(GL_LIGHT0, GL_DIFFUSE, L_dif);
   
   this->m_Camera.look();              // deja lista la modelview (vista)
