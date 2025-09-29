@@ -116,6 +116,13 @@ load_parametric_model(
 }
 
 // -------------------------------------------------------------------------
+const std::vector< PUJ_GL::Object* >& PUJ_GL::Scene::
+get_objects( ) const
+{
+  return( this->m_Objects );
+}
+
+// -------------------------------------------------------------------------
 void PUJ_GL::Scene::
 _reset( )
 {

@@ -28,6 +28,7 @@ namespace PUJ_GL
 
     virtual void set_mesh( PUJ_GL::Mesh* mesh );
     virtual void read( const std::string& fname );
+    virtual PUJ_GL::Mesh* get_mesh( );
 
     virtual void draw( ) override;
 

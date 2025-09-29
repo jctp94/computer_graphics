@@ -38,6 +38,7 @@ namespace PUJ_GL
     bool read( const std::string& fname );
     void set_image( PUJ_GL::Image* image );
     void draw( );
+    void set_material( int material_type );
 
   protected:
 
@@ -71,6 +72,7 @@ namespace PUJ_GL
     size_t m_NumberOfTextures { 0 };
 
     PUJ_GL::Image* m_Image { nullptr };
+    int m_CurrentMaterial { 0 }; // 0=SILVER, 1=SUPER_SHINY, 2=SUPER_MATTE
   };
 } // end namespace
 

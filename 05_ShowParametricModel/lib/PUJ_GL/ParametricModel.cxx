@@ -85,6 +85,11 @@ build( TParametricFunction f )
       std::calloc( n_faces * 9, sizeof( TNatural ) )
       );
   TNatural* idx = indices;
+
+  TReal du_vec[3];
+  TReal dv_vec[3];
+
+
   for( TNatural su = 0; su < this->m_SamplesU; ++su )
   {
     TReal nu = ( TReal( su ) / TReal( SU ) );
@@ -95,7 +100,20 @@ build( TParametricFunction f )
       TReal v = ( ov * nv ) + this->m_MinV;
 
       // Create points and normals
-      f( points, normals, u, v );
+      f( points, normals, du_vec, dv_vec, u, v );
+
+      // Calcular la normal como el producto cruz de las derivadas parciales
+      normals[0] = du_vec[1] * dv_vec[2] -du_vec[2] * dv_vec[1] ;
+      normals[1] = du_vec[0] * dv_vec[2] - du_vec[2] * dv_vec[0];
+      normals[2] = du_vec[0] * dv_vec[1]- du_vec[1] * dv_vec[0] ;
+
+      // Normalizar el vector normal
+      TReal normal_length = std::sqrt(normals[0]*normals[0] + normals[1]*normals[1] + normals[2]*normals[2]);
+      if (normal_length > 1e-6) {
+          normals[0] /= normal_length;
+          normals[1] /= normal_length;
+          normals[2] /= normal_length;
+      }
 
       // Create triangles
       if( su < this->m_SamplesU - 1 && sv < this->m_SamplesV - 1 )
