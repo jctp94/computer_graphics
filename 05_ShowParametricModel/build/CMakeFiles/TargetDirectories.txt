@@ -1,4 +1,0 @@
-/mnt/c/Users/Jonatan/Repositorios/computer_graphics/05_ShowParametricModel/build/CMakeFiles/PUJ_GL.dir
-/mnt/c/Users/Jonatan/Repositorios/computer_graphics/05_ShowParametricModel/build/CMakeFiles/PUJ_GL_ShowParametricModel.dir
-/mnt/c/Users/Jonatan/Repositorios/computer_graphics/05_ShowParametricModel/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/Jonatan/Repositorios/computer_graphics/05_ShowParametricModel/build/CMakeFiles/rebuild_cache.dir

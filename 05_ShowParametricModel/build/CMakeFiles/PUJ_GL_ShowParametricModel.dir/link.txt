@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/PUJ_GL_ShowParametricModel.dir/main.cxx.o CMakeFiles/PUJ_GL_ShowParametricModel.dir/App.cxx.o -o PUJ_GL_ShowParametricModel  libPUJ_GL.a /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libGLU.so /usr/lib/x86_64-linux-gnu/libglut.so 
