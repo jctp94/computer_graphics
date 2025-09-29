@@ -19,43 +19,6 @@ void parametric_model(
   PUJ_GL::Traits::TReal* du, PUJ_GL::Traits::TReal* dv,
   const PUJ_GL::Traits::TReal& u, const PUJ_GL::Traits::TReal& v
   )
-// {
-//   // point[ 0 ] = u;
-//   // point[ 1 ] = v;
-//   // point[ 2 ] = 0;
-
-//   // normal[ 0 ] = 0;
-//   // normal[ 1 ] = 0;
-//   // normal[ 2 ] = 1;
-
-//   PUJ_GL::Traits::TReal radius = 1.0f; // Puedes ajustar el radio
-//   point[0] = radius * std::sin(v) * std::cos(u);
-//   point[1] = radius * std::sin(v) * std::sin(u);
-//   point[2] = radius * std::cos(v);
-//   // Derivadas parciales
-//   du[0] = -radius * std::sin(v) * std::sin(u);
-//   du[1] =  radius * std::sin(v) * std::cos(u);
-//   du[2] =  0.0f;
-//   dv[0] =  radius * std::cos(v) * std::cos(u);
-//   dv[1] =  radius * std::cos(v) * std::sin(u);
-//   dv[2] = -radius * std::sin(v); 
-
-//   // PUJ_GL::Traits::TReal scale = 1.0f;
-//   // PUJ_GL::Traits::TReal amplitude = 0.1f; // Amplitud de la onda
-//   // PUJ_GL::Traits::TReal frequency = 5.0f; // Frecuencia de la onda
-//   // point[0] = scale * u;
-//   // point[1] = scale * v;
-//   // point[2] = amplitude * std::sin(frequency * u) * std::cos(frequency * v);
-
-//   normal[0] = 0.0f; 
-//   normal[1] = 0.0f; 
-//   normal[2] = 1.0f;
-
-//   // normal[0] = std::sin(v) * std::cos(u); 
-//   // normal[1] = std::sin(v) * std::sin(u); 
-//   // normal[2] = std::cos(v);
-// }
-
 {
   //Copa ejemplo de clase
   const PUJ_GL::Traits::TReal sqrt3 = std::sqrt(3.0f);
@@ -84,6 +47,36 @@ void parametric_model(
   normal[0] = 0.0f; 
   normal[1] = 0.0f; 
   normal[2] = 1.0f;
+
+  //  Esfera
+
+  // PUJ_GL::Traits::TReal radius = 1.0f; // Puedes ajustar el radio
+  // point[0] = radius * std::sin(v) * std::cos(u);
+  // point[1] = radius * std::sin(v) * std::sin(u);
+  // point[2] = radius * std::cos(v);
+  // // Derivadas parciales
+  // du[0] = -radius * std::sin(v) * std::sin(u);
+  // du[1] =  radius * std::sin(v) * std::cos(u);
+  // du[2] =  0.0f;
+  // dv[0] =  radius * std::cos(v) * std::cos(u);
+  // dv[1] =  radius * std::cos(v) * std::sin(u);
+  // dv[2] = -radius * std::sin(v); 
+
+  // Plano ondulado
+
+  // PUJ_GL::Traits::TReal scale = 1.0f;
+  // PUJ_GL::Traits::TReal amplitude = 0.1f; // Amplitud de la onda
+  // PUJ_GL::Traits::TReal frequency = 5.0f; // Frecuencia de la onda
+  // point[0] = scale * u;
+  // point[1] = scale * v;
+  // point[2] = amplitude * std::sin(frequency * u) * std::cos(frequency * v);
+  // Derivadas parciales 
+  // du[0] = scale;
+  // du[1] = 0.0f;
+  // du[2] = amplitude * frequency * std::cos(frequency * u) * std::cos(frequency * v);
+  // dv[0] = 0.0f;
+  // dv[1] = scale;
+  // dv[2] = -amplitude * frequency * std::sin(frequency * u) * std::sin(frequency * v);
 }
 // -------------------------------------------------------------------------
 App::
