@@ -102,7 +102,7 @@ App(
 
   this->m_Scene.load_parametric_model(
     parametric_model,
-    //0.0f, 2.0f * M_PI, 180, true, 0.0f, M_PI, 180, false, //rango esfera
+    //0.0f, 2.0f * M_PI, 180, true, 0.0f, 2.0f * M_PI, 180, false, //rango esfera
     // 1.0f, -1.0f, 180, false, 1.0f, -1.0f, 180, false, // rango plano ondulado
     -M_PI, M_PI, 180, false, -M_PI, M_PI, 180, false, // rango copa 
     image
