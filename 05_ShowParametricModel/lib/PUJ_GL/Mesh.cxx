@@ -65,6 +65,83 @@ clear( )
   this->m_Image = nullptr;
 }
 
+struct Material {
+  GLfloat ambient[4];
+  GLfloat diffuse[4];
+  GLfloat specular[4];
+  GLfloat shininess; // single value
+};
+
+inline void applyMaterial(const Material& m, GLenum face = GL_FRONT_AND_BACK) {
+  glMaterialfv(face, GL_AMBIENT,  m.ambient);
+  glMaterialfv(face, GL_DIFFUSE,  m.diffuse);
+  glMaterialfv(face, GL_SPECULAR, m.specular);
+  glMaterialf (face, GL_SHININESS, m.shininess);
+}
+
+static const Material GOLD = {
+  {0.24725f, 0.1995f, 0.0745f, 1.0f},
+  {0.75164f, 0.60648f, 0.22648f, 1.0f},
+  {0.628281f, 0.555802f, 0.366065f, 1.0f},
+  51.2f
+};
+
+static const Material TEXTURED_GOLD = {
+  {0.95f, 0.95f, 0.9f, 1.0f},  // leve tinte cálido
+  {0.95f, 0.9f,  0.75f, 1.0f}, // ¡suave! para no matar colores
+  {0.628281f, 0.555802f, 0.366065f, 1.0f},
+  51.2f// SHININESS de oro
+};
+
+static const Material SILVER = {
+  {0.19225f, 0.19225f, 0.19225f, 1.0f},
+  {0.50754f, 0.50754f, 0.50754f, 1.0f},
+  {0.508273f,0.508273f,0.508273f,1.0f},
+  51.2f
+};
+
+static const Material RUBBER_RED = { // goma roja mate
+  {0.05f, 0.0f, 0.0f, 1.0f},
+  {0.5f,  0.4f, 0.4f, 1.0f},
+  {0.7f,  0.04f,0.04f,1.0f},
+  10.0f
+};
+
+static const Material TEXTURED_NEUTRAL = {
+  {1.0f, 1.0f, 1.0f, 1.0f}, // AMBIENT
+  {1.0f, 1.0f, 1.0f, 1.0f}, // DIFFUSE
+  {0.2f, 0.2f, 0.2f, 1.0f}, // SPECULAR (ajústalo si quieres más brillo)
+  16.0f                     // SHININESS
+};
+
+static const Material SUPER_SHINY = {
+  {1,1,1,1}, {1,1,1,1},
+  {1.0f, 1.0f, 1.0f, 1.0f}, // especular fuerte
+  96.0f                     // 64–128 = puntico muy concentrado
+};
+
+// Mate total (goma): sin brillo
+static const Material SUPER_MATTE = {
+  {1,1,1,1}, {1,1,1,1},
+  {0.0f, 0.0f, 0.0f, 1.0f}, // sin especular
+  1.0f
+};
+
+// Textura + brillo dorado fuerte (sin teñir la textura)
+static const Material TEXTURED_GOLD_STRONG = {
+  {1,1,1,1}, {1,1,1,1},
+  {0.9f, 0.7f, 0.2f, 1.0f}, // especular dorado
+  80.0f
+};
+
+// Tinte visible (dora la textura)
+static const Material TINT_GOLD = {
+  {0.9f, 0.8f, 0.5f, 1},    // tinte cálido
+  {0.9f, 0.8f, 0.5f, 1},    // tinte cálido
+  {0.4f, 0.3f, 0.1f, 1},    // brillo suave y cálido
+  24.0f
+};
+
 // -------------------------------------------------------------------------
 bool PUJ_GL::Mesh::
 read( const std::string& fname )
@@ -189,30 +266,30 @@ set_image( PUJ_GL::Image* image )
 
 // -------------------------------------------------------------------------
 void PUJ_GL::Mesh::
+set_material( int material_type )
+{
+  this->m_CurrentMaterial = material_type;
+}
+
+// -------------------------------------------------------------------------
+void PUJ_GL::Mesh::
 draw( )
 {
-  // GLfloat material_color[] = { 0.0, 0.8, 0.0 , 1.0 };
-  // GLfloat specular_color[] = { 0.0, 0.0, 0.9 , 1.0 };
-  // // glMaterialfv( GL_FRONT, GL_DIFFUSE, material_color );
-  // glMaterialf( GL_FRONT, GL_SHININESS, 15 );
-  // glMaterialfv( GL_FRONT, GL_SPECULAR, specular_color );
-  
-
-  //       mesh->set_material_ambient(0.2f, 0.2f, 0.2f);
-  //     mesh->set_material_diffuse(0.8f, 0.8f, 0.8f);
-  //     mesh->set_material_specular(1.0f, 1.0f, 1.0f);
-  //     mesh->set_material_shininess(50.0f);
-
-  GLfloat ambient_color[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-  GLfloat specular_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  GLfloat diffuse_color[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-  GLfloat shininess = 50.0f;
+  // Apply selected material based on m_CurrentMaterial
+  switch( this->m_CurrentMaterial )
+  {
+    case 0: applyMaterial(SILVER); break;
+    case 1: applyMaterial(SUPER_SHINY); break;
+    case 2: applyMaterial(SUPER_MATTE); break;
+    case 3: applyMaterial(TEXTURED_GOLD); break;
+    case 4: applyMaterial(TINT_GOLD); break;
+    case 5: applyMaterial(TEXTURED_GOLD_STRONG); break;
+    case 6: applyMaterial(TEXTURED_NEUTRAL); break;
+    case 7: applyMaterial(RUBBER_RED); break;
+    default: applyMaterial(SILVER); break;
+  }
 
 
-  glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient_color );
-  glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, specular_color );
-  glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, diffuse_color );
-  glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, shininess);
   const TReal* v = this->m_Vertices;
   const TReal* n = this->m_Normals;
   const TReal* t = this->m_Textures;

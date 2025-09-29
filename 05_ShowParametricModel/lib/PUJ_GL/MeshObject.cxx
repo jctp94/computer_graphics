@@ -40,6 +40,13 @@ read( const std::string& fname )
 }
 
 // -------------------------------------------------------------------------
+PUJ_GL::Mesh* PUJ_GL::MeshObject::
+get_mesh( )
+{
+  return( this->m_Mesh );
+}
+
+// -------------------------------------------------------------------------
 void PUJ_GL::MeshObject::
 draw( )
 {

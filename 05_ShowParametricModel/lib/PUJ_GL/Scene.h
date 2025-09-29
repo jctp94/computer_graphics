@@ -44,6 +44,8 @@ namespace PUJ_GL
       const TNatural& samplesV, bool closedV,
       PUJ_GL::Image* image = nullptr
       );
+    
+    const std::vector< PUJ_GL::Object* >& get_objects( ) const;
 
   protected:
     void _reset( );

@@ -103,9 +103,9 @@ build( TParametricFunction f )
       f( points, normals, du_vec, dv_vec, u, v );
 
       // Calcular la normal como el producto cruz de las derivadas parciales
-      normals[0] = du_vec[1] * dv_vec[2] - du_vec[2] * dv_vec[1];
-      normals[1] = du_vec[2] * du_vec[0] - du_vec[0] * dv_vec[2];
-      normals[2] = du_vec[0] * dv_vec[1] - du_vec[1] * du_vec[0];
+      normals[0] = du_vec[1] * dv_vec[2] -du_vec[2] * dv_vec[1] ;
+      normals[1] = du_vec[0] * dv_vec[2] - du_vec[2] * dv_vec[0];
+      normals[2] = du_vec[0] * dv_vec[1]- du_vec[1] * dv_vec[0] ;
 
       // Normalizar el vector normal
       TReal normal_length = std::sqrt(normals[0]*normals[0] + normals[1]*normals[1] + normals[2]*normals[2]);

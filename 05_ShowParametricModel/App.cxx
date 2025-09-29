@@ -6,6 +6,8 @@
 #include "App.h"
 #include <PUJ_GL/Image.h>
 #include <PUJ_GL/Traits.h>
+#include <PUJ_GL/MeshObject.h>
+#include <PUJ_GL/Mesh.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <cmath>
@@ -78,10 +80,7 @@ App(
 
   this->m_Scene.load_parametric_model(
     parametric_model,
-    // -3.14, 3.14, 170, false, -3.14, 3.14, 170, false,
-    // -0.5, 0.5, 175, false, -0.5, 0.5, 175, false,
-    0.0f, 2.0f * M_PI, 180, false, 0.0f, M_PI, 180, true,
-    // 1.0f, -1.0f, 180, false, 1.0f, -1.0f, 180, false,
+    0.0f, 2.0f * M_PI, 180, false, 0.0f, M_PI, 180, false,
     image
     );
 
@@ -115,24 +114,7 @@ void App::init()
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
 
-  // Configuración de la luz (blanca)
-  // GLfloat L_amb[]  = {0.15f, 0.15f, 0.15f, 1.0f};
-  // GLfloat L_dif[]  = {0.85f, 0.85f, 0.85f, 1.0f};
-  // GLfloat L_spec[] = {1.00f, 1.00f, 1.00f, 1.0f};
-  // glLightfv(GL_LIGHT0, GL_AMBIENT,  L_amb);
-  // glLightfv(GL_LIGHT0, GL_DIFFUSE,  L_dif);
-  // glLightfv(GL_LIGHT0, GL_SPECULAR, L_spec);
-
-  // Hacemos que glColor afecte el material
   glEnable(GL_COLOR_MATERIAL);
-  // glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-  // // Especularidad del material
-  // GLfloat M_spec[] = {1.0f, 1.0f, 1.0f, 1.0f};
-  // glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, M_spec);
-  // glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 32.0f);
-
-  // Sombreado suave y normalización
   glShadeModel(GL_SMOOTH);
   glEnable(GL_NORMALIZE);
 }
@@ -165,20 +147,15 @@ _cb_display( )
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
-
-
-  GLfloat light_position[] = {0.0f, 0.0f, 1.0f, 1.0f};
+  
+  this->m_Camera.look();
+  
+  GLfloat light_position[] = {10.0f, 2.0f, 1.0f, 2.0f}; 
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-  // 🎨 Cambiar dinámicamente el color de la luz DIFUSA (ej. roja)
-  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 1.0f};  // rojo intenso
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, L_dif);
-  // glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5f);
-  // glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2f);
-  // glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1f);
-  this->m_Camera.look();              // deja lista la modelview (vista)
+  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 1.0f}; 
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, L_dif); 
 
-  // Ahora sí: posiciona la luz en espacio de cámara
 
   this->m_Scene.draw();
   glutSwapBuffers();
@@ -229,6 +206,126 @@ _cb_keyboard( unsigned char key, int x, int y )
   if( key == 'r' || key == 'R' )
   {
     this->m_Camera.reset( );
+    glutPostRedisplay( );
+  }
+  else if( key == '0' )
+  {
+    // Set SILVER material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(0); // SILVER
+        }
+      }
+    }
+    glutPostRedisplay( );
+  }
+  else if( key == '1' )
+  {
+    // Set SUPER_SHINY material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(1); // SUPER_SHINY
+        }
+      }
+    }
+    glutPostRedisplay( );
+  }
+  else if( key == '2' )
+  {
+    // Set SUPER_MATTE material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(2); // SUPER_MATTE
+        }
+      }
+    }
+    glutPostRedisplay( );
+  } // end if
+  else if( key == '3' )
+  {
+    // Set TEXTURED_GOLD material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(3); // TEXTURED_GOLD
+        }
+      }
+    }
+    glutPostRedisplay( );
+  } // end if
+  else if( key == '4' )
+  {
+    // Set TINT_GOLD material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(4); // TINT_GOLD
+        }
+      }
+    }
+    glutPostRedisplay( );
+  } // end if
+  else if( key == '5' )
+  {
+    // Set TEXTURED_GOLD_STRONG material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(5); // TEXTURED_GOLD_STRONG
+        }
+      }
+    }
+    glutPostRedisplay( );
+  } // end if
+  else if( key == '6' )
+  {
+    // Set TEXTURED_NEUTRAL material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(6); // TEXTURED_NEUTRAL
+        }
+      }
+    }
+    glutPostRedisplay( );
+  } // end if
+  else if( key == '7' )
+  {
+    // Set RUBBER_RED material
+    for( PUJ_GL::Object* obj: this->m_Scene.get_objects() )
+    {
+      if( auto* meshObj = dynamic_cast<PUJ_GL::MeshObject*>(obj) )
+      {
+        if( PUJ_GL::Mesh* mesh = meshObj->get_mesh() )
+        {
+          mesh->set_material(7); // RUBBER_RED
+        }
+      }
+    }
     glutPostRedisplay( );
   } // end if
 }
