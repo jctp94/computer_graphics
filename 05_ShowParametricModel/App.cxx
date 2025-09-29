@@ -14,6 +14,7 @@
 // -------------------------------------------------------------------------
 void parametric_model(
   PUJ_GL::Traits::TReal* point, PUJ_GL::Traits::TReal* normal,
+  PUJ_GL::Traits::TReal* du, PUJ_GL::Traits::TReal* dv,
   const PUJ_GL::Traits::TReal& u, const PUJ_GL::Traits::TReal& v
   )
 {
@@ -30,12 +31,12 @@ void parametric_model(
   point[1] = radius * std::sin(v) * std::sin(u);
   point[2] = radius * std::cos(v);
   // Derivadas parciales
-  // du[0] = -radius * std::sin(v) * std::sin(u);
-  // du[1] =  radius * std::sin(v) * std::cos(u);
-  // du[2] =  0.0f;
-  // dv[0] =  radius * std::cos(v) * std::cos(u);
-  // dv[1] =  radius * std::cos(v) * std::sin(u);
-  // dv[2] = -radius * std::sin(v); 
+  du[0] = -radius * std::sin(v) * std::sin(u);
+  du[1] =  radius * std::sin(v) * std::cos(u);
+  du[2] =  0.0f;
+  dv[0] =  radius * std::cos(v) * std::cos(u);
+  dv[1] =  radius * std::cos(v) * std::sin(u);
+  dv[2] = -radius * std::sin(v); 
 
   // PUJ_GL::Traits::TReal scale = 1.0f;
   // PUJ_GL::Traits::TReal amplitude = 0.1f; // Amplitud de la onda
@@ -44,13 +45,13 @@ void parametric_model(
   // point[1] = scale * v;
   // point[2] = amplitude * std::sin(frequency * u) * std::cos(frequency * v);
 
-  // normal[0] = 0.0f; 
-  // normal[1] = 0.0f; 
-  // normal[2] = 1.0f;
+  normal[0] = 0.0f; 
+  normal[1] = 0.0f; 
+  normal[2] = 1.0f;
 
-  normal[0] = std::sin(v) * std::cos(u); 
-  normal[1] = std::sin(v) * std::sin(u); 
-  normal[2] = std::cos(v);
+  // normal[0] = std::sin(v) * std::cos(u); 
+  // normal[1] = std::sin(v) * std::sin(u); 
+  // normal[2] = std::cos(v);
 }
 
 // -------------------------------------------------------------------------
@@ -79,7 +80,7 @@ App(
     parametric_model,
     // -3.14, 3.14, 170, false, -3.14, 3.14, 170, false,
     // -0.5, 0.5, 175, false, -0.5, 0.5, 175, false,
-    0.0f, 2.0f * M_PI, 180, true, 0.0f, M_PI, 180, true,
+    0.0f, 2.0f * M_PI, 180, false, 0.0f, M_PI, 180, true,
     // 1.0f, -1.0f, 180, false, 1.0f, -1.0f, 180, false,
     image
     );
@@ -115,21 +116,21 @@ void App::init()
   glEnable(GL_LIGHT0);
 
   // Configuración de la luz (blanca)
-  GLfloat L_amb[]  = {0.15f, 0.15f, 0.15f, 1.0f};
-  GLfloat L_dif[]  = {0.85f, 0.85f, 0.85f, 1.0f};
-  GLfloat L_spec[] = {1.00f, 1.00f, 1.00f, 1.0f};
-  glLightfv(GL_LIGHT0, GL_AMBIENT,  L_amb);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE,  L_dif);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, L_spec);
+  // GLfloat L_amb[]  = {0.15f, 0.15f, 0.15f, 1.0f};
+  // GLfloat L_dif[]  = {0.85f, 0.85f, 0.85f, 1.0f};
+  // GLfloat L_spec[] = {1.00f, 1.00f, 1.00f, 1.0f};
+  // glLightfv(GL_LIGHT0, GL_AMBIENT,  L_amb);
+  // glLightfv(GL_LIGHT0, GL_DIFFUSE,  L_dif);
+  // glLightfv(GL_LIGHT0, GL_SPECULAR, L_spec);
 
   // Hacemos que glColor afecte el material
   glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  // glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-  // Especularidad del material
-  GLfloat M_spec[] = {1.0f, 1.0f, 1.0f, 1.0f};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, M_spec);
-  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 32.0f);
+  // // Especularidad del material
+  // GLfloat M_spec[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  // glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, M_spec);
+  // glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 32.0f);
 
   // Sombreado suave y normalización
   glShadeModel(GL_SMOOTH);
@@ -166,13 +167,15 @@ _cb_display( )
   glLoadIdentity( );
 
 
-  GLfloat light_position[] = {0.0f, 0.0f, -2.0f, 1.0f};
+  GLfloat light_position[] = {0.0f, 0.0f, 1.0f, 1.0f};
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   // 🎨 Cambiar dinámicamente el color de la luz DIFUSA (ej. roja)
-  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 0.3f};  // rojo intenso
+  GLfloat L_dif[] = {1.0f, 0.0f, 0.0f, 1.0f};  // rojo intenso
   glLightfv(GL_LIGHT0, GL_DIFFUSE, L_dif);
-  
+  // glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.5f);
+  // glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.2f);
+  // glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.1f);
   this->m_Camera.look();              // deja lista la modelview (vista)
 
   // Ahora sí: posiciona la luz en espacio de cámara

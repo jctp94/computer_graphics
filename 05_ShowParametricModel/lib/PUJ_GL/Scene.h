@@ -23,7 +23,7 @@ namespace PUJ_GL
 
     using TParametricFunction
       =
-      std::function< void( TReal*, TReal*, const TReal&, const TReal& ) >;
+      std::function< void( TReal*, TReal*, TReal*, TReal*, const TReal&, const TReal& ) >;
 
   public:
     Scene( );

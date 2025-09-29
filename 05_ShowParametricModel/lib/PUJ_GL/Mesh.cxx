@@ -203,16 +203,16 @@ draw( )
   //     mesh->set_material_specular(1.0f, 1.0f, 1.0f);
   //     mesh->set_material_shininess(50.0f);
 
-  // GLfloat ambient_color[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-  // GLfloat specular_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  // GLfloat diffuse_color[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-  // GLfloat shininess = 50.0f;
+  GLfloat ambient_color[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+  GLfloat specular_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  GLfloat diffuse_color[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+  GLfloat shininess = 50.0f;
 
 
-  // glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient_color );
-  // glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, specular_color );
-  // glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, diffuse_color );
-  // glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+  glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient_color );
+  glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, specular_color );
+  glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, diffuse_color );
+  glMaterialf( GL_FRONT_AND_BACK, GL_SHININESS, shininess);
   const TReal* v = this->m_Vertices;
   const TReal* n = this->m_Normals;
   const TReal* t = this->m_Textures;
