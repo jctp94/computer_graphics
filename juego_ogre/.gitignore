@@ -1,0 +1,80 @@
+# Ogre3D cache/build/temp files
+/build/
+/bin/
+/lib/
+/target/
+/Debug/
+/Release/
+*.vcxproj*
+*.sln
+*.user
+*.suo
+*.log
+*.obj
+*.exp
+*.lib
+*.dll
+*.pdb
+*.idb
+*.ncb
+*.aps
+*.opensdf
+*.sdf
+*.ipch
+*.tlog
+*.lastbuildstate
+*.ilk
+*.manifest
+*.cache
+*.CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+
+# Ogre3D generated/config files
+*.cfg
+plugins.cfg
+resources.cfg
+ogre.cfg
+
+# Ogre3D media/generated files
+media/
+Media/
+
+# Ogre3D SampleBrowser
+Samples/
+SampleBrowser/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+.venv
+env/
+venv/
+Pipfile.lock
+
+# VSCode/IDE
+.vscode/
+*.swp
+
+# Python coverage/mypy/test/tools
+htmlcov/
+.coverage
+.mypy_cache/
+.pytest_cache/
+
+# MacOS
+.DS_Store
+
+# Misc
+Thumbs.db
+# End Generation Here
+```
