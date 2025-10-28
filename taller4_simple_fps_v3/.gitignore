@@ -1,0 +1,73 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+.Python
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Django stuff:
+*.log
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Pyre type checker
+.pyre/
+
+# OCR related files
+output_text.txt
+*.ocr.txt
+*.ocr.json
+
+# Tesseract OCR temporary or output files
+*.box
+*.osd
+*.tif
+*.user-patterns
+*.user-words
+
+# Local config files
+*.env
+.env.*
+*.secret
+
+# macOS & Linux
+.DS_Store
+.cache/
+Thumbs.db
+
+# Windows
+desktop.ini
+__pycache__/
+**/__pycache__/
