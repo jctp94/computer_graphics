@@ -62,19 +62,24 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     cam = self.m_CamMan.getCamera()
     cam_node = cam.getParentSceneNode()
 
-    # World position d units in front of the camera (camera looks along local -Z)
-    target_pos = cam_node.convertLocalToWorldPosition(Ogre.Vector3(0, 0, -d))
+    cam_pos = cam.getPosition()
 
-    # Optionally match the camera’s orientation too
-    target_orient = cam_node._getDerivedOrientation()  # in some bindings it may be getDerivedOrientation()
+    print('Camera position: ' , cam_pos)
+    
+    cam_orient = cam.getOrientation()
+    cam_forward = cam_orient * Ogre.Vector3(0, 0, -1)
+    cam_forward.normalise()
+    
+    # World position d units in front of the camera (camera looks along local -Z)
+    target_pos = cam_pos + cam_forward * d
 
     # Move your object
     node.setPosition(target_pos)
     # If you want it to face the same way as the camera:
-    node.setOrientation(target_orient)
+    node.setOrientation(cam_orient)
 
     # node.setPosition( cameraPosition[0], cameraPosition[1], cameraPosition[2] - 5)
-    self.m_AliveBullets += [ node ]
+    self.m_AliveBullets.append(node)
 
   '''
   '''
