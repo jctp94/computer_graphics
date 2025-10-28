@@ -70,4 +70,5 @@ Thumbs.db
 # Windows
 desktop.ini
 __pycache__/
-**/__pycache__/
+*/__pycache__/*
+
