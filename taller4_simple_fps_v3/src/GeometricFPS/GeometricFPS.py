@@ -34,8 +34,47 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
   # end def
 
   def setup( self ):
-    self.m_Listener = FPSListener( self.getRoot( ) )
+    self.m_Listener = FPSListener( self.getRoot( ), self )
     super( GeometricFPS, self ).setup( )
+
+  def shootBullet( self ):
+    name = self.m_AvailableNames['bullet'].pop( 0 )
+    print('Shooting bullet: ' + name)
+    print(self.m_Bullets['bullet'][0])
+    print(self.m_Bullets['bullet'][1])
+    print(self.m_Bullets['bullet'][3])
+    node = self._createManualObject(
+        self.m_Bullets['bullet'][ 5 ], name, self.m_Bullets['bullet'][ 0 ]
+        )
+    pos = node.getAttachedObject( 0 ).getBoundingBox( ).getMinimum( )
+    qos = Ogre.Vector3(
+      random.uniform( self.m_Ground[ 0 ], self.m_Ground[ 1 ] ),
+      pos.y * -1.0,
+      random.uniform( self.m_Ground[ 2 ], self.m_Ground[ 3 ] )
+      )
+    # cameraPosition = self.m_CamMan.getCamera( ).getTarget( )
+
+    print('Camera target: ' , self.m_CamMan.getCamera( ).getOrientation())
+
+    # d = distance in front of the camera (in world units)
+    d = 5.0
+
+    cam = self.m_CamMan.getCamera()
+    cam_node = cam.getParentSceneNode()
+
+    # World position d units in front of the camera (camera looks along local -Z)
+    target_pos = cam_node.convertLocalToWorldPosition(Ogre.Vector3(0, 0, -d))
+
+    # Optionally match the camera’s orientation too
+    target_orient = cam_node._getDerivedOrientation()  # in some bindings it may be getDerivedOrientation()
+
+    # Move your object
+    node.setPosition(target_pos)
+    # If you want it to face the same way as the camera:
+    node.setOrientation(target_orient)
+
+    # node.setPosition( cameraPosition[0], cameraPosition[1], cameraPosition[2] - 5)
+    self.m_AliveBullets += [ node ]
 
   '''
   '''
@@ -109,7 +148,7 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       bullet_max = int( scene[ 'bullet' ][ -3 ] )
       bullet_speed = float( scene[ 'bullet' ][ -2 ] )
       bullet_time_spawn = int( scene[ 'bullet' ][ -1 ] ) 
-      self.m_Bullets[ 'bullet' ] = [ bullet_material, bullet_damage, bullet_max, bullet_speed, bullet_time_spawn, self._sphere( float( scene[ 'bullet' ][ 0 ] ), 100, 100 ) ]
+      self.m_Bullets[ 'bullet' ] = [ bullet_material, bullet_damage, bullet_max, bullet_speed, bullet_time_spawn, self._sphere( float( scene[ 'sphere' ][ 0 ] ), 100, 100 ) ]
       self.m_AvailableNames[ 'bullet' ] = [ 'bullet_' + str( i ) for i in range( bullet_max ) ]  
 
     # end if

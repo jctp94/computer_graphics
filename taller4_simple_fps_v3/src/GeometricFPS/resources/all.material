@@ -26,3 +26,17 @@ material bad_guy1
   }
 }
 
+material bullet_bross
+{
+  technique
+  {
+    pass
+    {
+      texture_unit 
+      {
+        texture bullet_bross.png
+      }
+    }
+  }
+}
+
