@@ -38,6 +38,9 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     super( GeometricFPS, self ).setup( )
 
   def shootBullet( self ):
+    if not self.m_AvailableNames['bullet']:
+      print("No bullets available to shoot.")
+      return
     name = self.m_AvailableNames['bullet'].pop( 0 )
     print('Shooting bullet: ' + name)
     print(self.m_Bullets['bullet'][0])
@@ -77,6 +80,7 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     node.setPosition(target_pos)
     # If you want it to face the same way as the camera:
     node.setOrientation(cam_orient)
+    node.vector =  ( ( node.getPosition( ) - cam_pos ).normalisedCopy( ) ) * self.m_Bullets['bullet'][3]
 
     # node.setPosition( cameraPosition[0], cameraPosition[1], cameraPosition[2] - 5)
     self.m_AliveBullets.append(node)
@@ -142,7 +146,7 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       bad_guy_stamina = int( scene[ 'sphere' ][ -3 ] )
       bad_guy_spawn_prob = float( scene[ 'sphere' ][ -2 ] )
       bad_guy_max = int( scene[ 'sphere' ][ -1 ] )
-      self.m_BadGuys[ 'sphere' ] = [ bad_guy_material, bad_guy_stamina, bad_guy_spawn_prob, bad_guy_max, self._sphere( float( scene[ 'sphere' ][ 0 ] ), 100, 100 ) ]
+      self.m_BadGuys[ 'sphere' ] = [ bad_guy_material, bad_guy_stamina, bad_guy_spawn_prob, bad_guy_max, self._sphere( float( scene[ 'sphere' ][ 0 ] ), 100, 100 ), float( scene[ 'sphere' ][ 0 ] ) ]
       self.m_AvailableNames[ 'sphere' ] = [ 'sphere_' + str( i ) for i in range( bad_guy_max ) ]
     if 'bullet' in scene:
       print('Loading bullet parameters')
@@ -153,8 +157,8 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       bullet_max = int( scene[ 'bullet' ][ -3 ] )
       bullet_speed = float( scene[ 'bullet' ][ -2 ] )
       bullet_time_spawn = int( scene[ 'bullet' ][ -1 ] ) 
-      self.m_Bullets[ 'bullet' ] = [ bullet_material, bullet_damage, bullet_max, bullet_speed, bullet_time_spawn, self._sphere( float( scene[ 'sphere' ][ 0 ] ), 100, 100 ) ]
-      self.m_AvailableNames[ 'bullet' ] = [ 'bullet_' + str( i ) for i in range( bullet_max ) ]  
+      self.m_Bullets[ 'bullet' ] = [ bullet_material, bullet_damage, bullet_max, bullet_speed, bullet_time_spawn, self._sphere( float( scene[ 'bullet' ][ 0 ] ), 100, 100 ), float( scene[ 'bullet' ][ 0 ] ) ]
+      self.m_AvailableNames[ 'bullet' ] = [ 'bullet_' + str( i ) for i in range( bullet_max ) ] 
 
     # end if
   # end def
@@ -184,7 +188,12 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
               random.uniform( self.m_Ground[ 2 ], self.m_Ground[ 3 ] )
               )
             node.setPosition( qos )
-            self.m_AliveBadGuys[ k ] += [ node ]
+            self.m_AliveBadGuys[ k ] += [ {
+              'node': node,
+              'radius': self.m_BadGuys[ k ][ -1 ],
+              'stamina': float(self.m_BadGuys[ k ][ 1 ]),
+              'name': name
+            } ]
           # end if
         # end if
       # end if
@@ -198,11 +207,41 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     # Move bad guys
     for k in self.m_AliveBadGuys:
       for n in self.m_AliveBadGuys[ k ]:
-        d = ( ( pos - n.getPosition( ) ).normalisedCopy( ) ) * 1e-1
-        n.translate( d )
+        d = ( ( pos - n['node'].getPosition( ) ).normalisedCopy( ) ) * 1e-1
+        n['node'].translate( d )
       # end for
     # end for
+    # Move bullets
+    for k in self.m_AliveBullets:
+      k.translate( k.vector)
+    # end for
 
+    bullets_to_remove = []
+    for bullet in self.m_AliveBullets:
+      for bad_guy_type in self.m_AliveBadGuys:
+        bad_guys_to_remove = []
+        for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
+          if bullet.getPosition().distance(bad_guy['node'].getPosition()) < self.m_BadGuys[bad_guy_type][-1]:
+            bad_guy['stamina'] -= self.m_Bullets['bullet'][1]
+            bullets_to_remove.append(bullet)
+            if bad_guy['stamina'] <= 0:
+              print('Destroying bad guy: ', bad_guy['node'].getName())
+              bad_guys_to_remove.append(bad_guy)
+            break  # end if
+        # end for
+        for bad_guy in bad_guys_to_remove:
+          node = bad_guy['node']
+          self.m_SceneMgr.destroySceneNode(node)
+          self.m_AvailableNames[bad_guy_type].append(bad_guy['name'])
+          self.m_AliveBadGuys[bad_guy_type].remove(bad_guy)
+          self.m_SceneMgr.destroyManualObject(bad_guy['name'])
+        # end for
+    # for bullet in bullets_to_remove:
+    #   node = bullet['node']
+    #   self.m_SceneMgr.destroySceneNode(node)
+    #   self.m_AvailableNames['bullet'].append(node.getName())
+    #   self.m_AliveBullets.remove(bullet)
+    # end for
     return r
   # end def
 
