@@ -26,6 +26,34 @@ material bad_guy1
   }
 }
 
+material bad_guy2
+{
+  technique
+  {
+    pass
+    {
+      texture_unit 
+      {
+        texture brick.jpg
+      }
+    }
+  }
+}
+
+material bad_guy3
+{
+  technique
+  {
+    pass
+    {
+      texture_unit 
+      {
+        texture cone.jpg
+      }
+    }
+  }
+}
+
 material bullet_bross
 {
   technique

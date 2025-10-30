@@ -161,11 +161,11 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     vp.setBackgroundColour( skycolor )
 
     # Load 'bad guys'
-    self.m_BadGuys = { 'sphere' : None, 'cylinder' : None, 'cone' : None }
+    self.m_BadGuys = { 'sphere' : None, 'cylinder' : None, 'cone' : None , 'box' : None }
     self.m_Bullets = { 'bullet' : None }
     self.m_AliveBullets = []
-    self.m_AliveBadGuys = { 'sphere' : [], 'cylinder' : [], 'cone' : [] }
-    self.m_AvailableNames = { 'sphere' : [], 'cylinder' : [], 'cone' : [], 'bullet' : [] }
+    self.m_AliveBadGuys = { 'sphere' : [], 'cylinder' : [], 'cone' : [], 'box' : [] }
+    self.m_AvailableNames = { 'sphere' : [], 'cylinder' : [], 'cone' : [], 'bullet' : [], 'box' : [] }
     if 'sphere' in scene:
       bad_guy_material = scene[ 'sphere' ][ -4 ]
       bad_guy_stamina = int( scene[ 'sphere' ][ -3 ] )
@@ -173,6 +173,23 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       bad_guy_max = int( scene[ 'sphere' ][ -1 ] )
       self.m_BadGuys[ 'sphere' ] = [ bad_guy_material, bad_guy_stamina, bad_guy_spawn_prob, bad_guy_max, self._sphere( float( scene[ 'sphere' ][ 0 ] ), 100, 100 ), float( scene[ 'sphere' ][ 0 ] ) ]
       self.m_AvailableNames[ 'sphere' ] = [ 'sphere_' + str( i ) for i in range( bad_guy_max ) ]
+    if 'box' in scene:
+      bad_guy_material = scene[ 'box' ][ -4 ]
+      bad_guy_stamina = int( scene[ 'box' ][ -3 ] )
+      bad_guy_spawn_prob = float( scene[ 'box' ][ -2 ] )
+      bad_guy_max = int( scene[ 'box' ][ -1 ] )
+      self.m_BadGuys[ 'box' ] = [ bad_guy_material, bad_guy_stamina, bad_guy_spawn_prob, bad_guy_max, self._box( float( scene[ 'box' ][ 0 ] )), float( scene[ 'box' ][ 0 ] ) ]
+      self.m_AvailableNames[ 'box' ] = [ 'box_' + str( i ) for i in range( bad_guy_max ) ]
+    if 'cone' in scene:
+      bad_guy_material = scene[ 'cone' ][ -4 ]
+      bad_guy_stamina = int( scene[ 'cone' ][ -3 ] )
+      bad_guy_spawn_prob = float( scene[ 'cone' ][ -2 ] )
+      bad_guy_max = int( scene[ 'cone' ][ -1 ] )
+      bad_guy_size = [ float( scene[ 'cone' ][ 0 ] ), float( scene[ 'cone' ][ 1 ] ) ]
+      self.m_BadGuys[ 'cone' ] = [ bad_guy_material, bad_guy_stamina, bad_guy_spawn_prob, bad_guy_max, self._cone( float( scene[ 'cone' ][ 0 ] ), float( scene[ 'cone' ][ 1 ] )), bad_guy_size ]
+      self.m_AvailableNames[ 'cone' ] = [ 'cone_' + str( i ) for i in range( bad_guy_max ) ]
+    
+    # end if
     if 'bullet' in scene:
       print('Loading bullet parameters')
       print(scene[ 'bullet' ]) 
@@ -201,7 +218,11 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       for bad_guy_type in self.m_AliveBadGuys:
         bad_guys_to_remove = []
         for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
-          if bullet['node'].getPosition().distance(bad_guy['node'].getPosition()) < self.m_BadGuys[bad_guy_type][-1]:
+          if bad_guy_type == 'cone':
+            distance = self.m_BadGuys[bad_guy_type][-1][0]
+          else:
+            distance = self.m_BadGuys[bad_guy_type][-1]
+          if bullet['node'].getPosition().distance(bad_guy['node'].getPosition()) < distance:
             bad_guy['stamina'] -= self.m_Bullets['bullet'][1]
             bullets_to_remove.append(bullet)
             if bad_guy['stamina'] <= 0:
@@ -231,8 +252,11 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
         cam = self.m_CamMan.getCamera()
         cam_node = cam.getParentSceneNode()
         cam_pos = cam.getPosition()
-
-        if bad_guy['node'].getPosition().distance(cam_pos) < self.m_BadGuys[bad_guy_type][-1]:
+        if bad_guy_type == 'cone':
+          distance = self.m_BadGuys[bad_guy_type][-1][0]
+        else:
+          distance = self.m_BadGuys[bad_guy_type][-1]
+        if bad_guy['node'].getPosition().distance(cam_pos) < distance:
           print('Bad guy hit camera')
           if (self.m_Elapsed - self.m_LastDamageTime) >= HIT_COOLDOWN:
             self._apply_damage(DAMAGE)
@@ -278,12 +302,28 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
               random.uniform( self.m_Ground[ 2 ], self.m_Ground[ 3 ] )
               )
             node.setPosition( qos )
-            self.m_AliveBadGuys[ k ] += [ {
-              'node': node,
-              'radius': self.m_BadGuys[ k ][ -1 ],
-              'stamina': float(self.m_BadGuys[ k ][ 1 ]),
-              'name': name
-            } ]
+            if k == 'sphere':
+              self.m_AliveBadGuys[ k ] += [ {
+                'node': node,
+                'radius': self.m_BadGuys[ k ][ -1 ],
+                'stamina': float(self.m_BadGuys[ k ][ 1 ]),
+                'name': name
+              } ]
+            elif k == 'box':
+              self.m_AliveBadGuys[ k ] += [ {
+                'node': node,
+                'size': self.m_BadGuys[ k ][ -1 ],
+                'stamina': float(self.m_BadGuys[ k ][ 1 ]),
+                'name': name
+              } ]
+            elif k == 'cone':
+              self.m_AliveBadGuys[ k ] += [ {
+                'node': node,
+                'height': self.m_BadGuys[ k ][ -1 ][0],
+                'radius': self.m_BadGuys[ k ][ -1 ][1],
+                'stamina': float(self.m_BadGuys[ k ][ 1 ]),
+                'name': name
+              } ]
           # end if
         # end if
       # end if
@@ -297,8 +337,15 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     # Move bad guys
     for k in self.m_AliveBadGuys:
       for n in self.m_AliveBadGuys[ k ]:
-        d = ( ( pos - n['node'].getPosition( ) ).normalisedCopy( ) ) * 1e-1
-        n['node'].translate( d )
+        if k == 'sphere':
+          d = ( ( pos - n['node'].getPosition( ) ).normalisedCopy( ) ) * 1e-1
+          n['node'].translate( d )
+        elif k == 'box':
+          d = ( ( pos - n['node'].getPosition( ) ).normalisedCopy( ) ) * 1e-2
+          n['node'].translate( d )
+        elif k == 'cone':
+          d = ( ( pos - n['node'].getPosition( ) ).normalisedCopy( ) ) * 5e-1
+          n['node'].translate( d )
       # end for
     # end for
     # Move bullets

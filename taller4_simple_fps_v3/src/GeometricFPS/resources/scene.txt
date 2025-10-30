@@ -1,6 +1,8 @@
 ground -200 200 -200 200
 camera 1e-3 1.7 1.0
 skycolor 0.7 0.5 0.9
-sphere 1.0 bad_guy1 5 0.07 3
+sphere 1.0 bad_guy1 5 0.04 3
+box 50 bad_guy2 10 0.02 3
+cone 10.0 3.0 bad_guy3 5 0.03 3
 cylinder 0.3 0.5 bad_guy1 10 0.03 30
 bullet 0.05 bullet_bross 5 15 1 5
