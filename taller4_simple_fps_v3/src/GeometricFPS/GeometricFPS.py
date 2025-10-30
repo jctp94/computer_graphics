@@ -83,7 +83,7 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     node.vector =  ( ( node.getPosition( ) - cam_pos ).normalisedCopy( ) ) * self.m_Bullets['bullet'][3]
 
     # node.setPosition( cameraPosition[0], cameraPosition[1], cameraPosition[2] - 5)
-    self.m_AliveBullets.append(node)
+    self.m_AliveBullets.append({'node': node, 'name': name})
 
   '''
   '''
@@ -213,7 +213,8 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     # end for
     # Move bullets
     for k in self.m_AliveBullets:
-      k.translate( k.vector)
+      node = k['node']
+      node.translate( node.vector)
     # end for
 
     bullets_to_remove = []
@@ -221,7 +222,7 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       for bad_guy_type in self.m_AliveBadGuys:
         bad_guys_to_remove = []
         for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
-          if bullet.getPosition().distance(bad_guy['node'].getPosition()) < self.m_BadGuys[bad_guy_type][-1]:
+          if bullet['node'].getPosition().distance(bad_guy['node'].getPosition()) < self.m_BadGuys[bad_guy_type][-1]:
             bad_guy['stamina'] -= self.m_Bullets['bullet'][1]
             bullets_to_remove.append(bullet)
             if bad_guy['stamina'] <= 0:
@@ -236,11 +237,12 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
           self.m_AliveBadGuys[bad_guy_type].remove(bad_guy)
           self.m_SceneMgr.destroyManualObject(bad_guy['name'])
         # end for
-    # for bullet in bullets_to_remove:
-    #   node = bullet['node']
-    #   self.m_SceneMgr.destroySceneNode(node)
-    #   self.m_AvailableNames['bullet'].append(node.getName())
-    #   self.m_AliveBullets.remove(bullet)
+    for bullet in bullets_to_remove:
+      node = bullet['node']
+      self.m_SceneMgr.destroySceneNode(node)
+      self.m_AvailableNames['bullet'].append(bullet['name'])
+      self.m_AliveBullets.remove(bullet)
+      self.m_SceneMgr.destroyManualObject(bullet['name'])
     # end for
     return r
   # end def
