@@ -12,7 +12,7 @@ Antes de comenzar, asegúrate de tener los siguientes programas instalados:
 
 - **Python 3.12**
 - **Ogre3D** (asegurate de tener la versión correcta de Ogre compatible con el sistema)
-- **VTK** (para las geometrías paramétricas)
+- **VTK** (para las geometrías)
 
 ---
 
@@ -83,7 +83,6 @@ bullet 0.05 bullet_bross 5 15 1 5
 El juego se maneja utilizando las siguientes teclas:
 
 - **WASD**: Movimiento del jugador en el espacio.
-- **Espacio**: Salto del jugador.
 - **Click del mouse**: Disparo de las balas.
 
 ---
@@ -137,25 +136,25 @@ for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
 
 En la siguiente imagen, se pueden ver algunos de los enemigos presentes en el juego. Estos enemigos son generados según las configuraciones del archivo `scene.txt`, que incluye **esferas, conos y cubos**.
 
-![Enemigos](/Imagenes/image%202.png)
+![Enemigos](./Imagenes/image%202.png)
 
 ### **8.2. Otro Tipo de Enemigos**
 
 En la siguiente captura, se muestra otro conjunto de enemigos, específicamente **cajas** y **conos**, que también son parte de los enemigos que el jugador debe enfrentar.
 
-![Enemigos 2](/Imagenes/image.png)
+![Enemigos 2](./Imagenes/image.png)
 
 ### **8.3. Vida del Jugador y Game Over**
 
 Cuando el jugador es golpeado por los enemigos, pierde salud, y si su salud llega a cero, el juego termina. En la siguiente imagen se muestra el **estado de salud** del jugador, justo antes de la finalización del juego.
 
-![Vida y Game Over](/Imagenes/image3.png)
+![Vida y Game Over](./Imagenes/image3.png)
 
 ### **8.4. Bala en Acción**
 
 En esta captura, se muestra cómo una **bala** disparada por el jugador se aproxima a uno de los enemigos. Las balas tienen una vida útil limitada y desaparecerán al impactar con un enemigo o después de cierto tiempo.
 
-![Bala en Acción](/Imagenes/image4bala.png)
+![Bala en Acción](./Imagenes/image4bala.png)
 
 ---
 
