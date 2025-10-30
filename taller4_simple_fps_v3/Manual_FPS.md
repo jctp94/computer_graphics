@@ -1,8 +1,8 @@
 
-# **Manual del taller 4 - FPS Geométrico en Ogre3D**
+# **Manual del Proyecto - FPS Geométrico en Ogre3D**
 
 ## **1. Descripción del Proyecto**
-Este proyecto implementa un videojuego estilo **First-Person Shooter (FPS)** utilizando **Ogre3D** y **VTK** para la visualización de geometrías de enemigos. El juego presenta enemigos como esferas, cilindros, conos y cajas, que deben ser eliminados por el jugador, quien tiene que disparar balas desde una vista en primera persona.
+Este proyecto implementa un videojuego estilo **First-Person Shooter (FPS)** utilizando **Ogre3D** y **VTK** para la visualización de geometrías de enemigos. El juego presenta enemigos como esferas, conos y cajas, que deben ser eliminados por el jugador, quien tiene que disparar balas desde una vista en primera persona.
 
 ---
 
@@ -13,7 +13,6 @@ Antes de comenzar, asegúrate de tener los siguientes programas instalados:
 - **Python 3.12**
 - **Ogre3D** (asegurate de tener la versión correcta de Ogre compatible con el sistema)
 - **VTK** (para las geometrías paramétricas)
-- **SDL** (para la gestión de la entrada de teclado y mouse)
 
 ---
 
@@ -49,7 +48,6 @@ El proyecto se organiza en varios archivos clave:
 1. **Ogre3D**: Descarga e instala Ogre3D desde su [sitio oficial](https://www.ogre3d.org/).
 2. **VTK**: Instala VTK desde [VTK.org](https://vtk.org/).
 3. **Python**: Asegúrate de tener Python 3.12 y de haber configurado el entorno correctamente.
-4. **SDL**: Puedes instalar SDL a través de tu gestor de paquetes si estás en Linux, o descargarlo desde su [sitio web](https://www.libsdl.org/download-2.0.php) si usas Windows.
 
 ### **4.2. Configuración de Ogre3D en el Proyecto**
 
@@ -60,8 +58,7 @@ El proyecto se organiza en varios archivos clave:
 
 ## **5. Configuración del Proyecto**
 
-El archivo de configuración `scene.txt` contiene la información sobre los enemigos, la cámara y otros aspectos del entorno. Aquí hay un ejemplo de su contenido:
-
+El archivo de configuración `scene.txt` contiene la información sobre los enemigos, la cámara y otros aspectos del entorno. 
 ```txt
 ground -200 200 -200 200
 camera 1e-3 1.7 1.0
@@ -134,13 +131,41 @@ for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
         bullets_to_remove.append(bullet)
 ```
 
-## **8. Conclusión**
+## **8. Imágenes del Juego**
+
+### **8.1. Enemigos en el Juego**
+
+En la siguiente imagen, se pueden ver algunos de los enemigos presentes en el juego. Estos enemigos son generados según las configuraciones del archivo `scene.txt`, que incluye **esferas, conos y cubos**.
+
+![Enemigos](/Imagenes/image%202.png)
+
+### **8.2. Otro Tipo de Enemigos**
+
+En la siguiente captura, se muestra otro conjunto de enemigos, específicamente **cajas** y **conos**, que también son parte de los enemigos que el jugador debe enfrentar.
+
+![Enemigos 2](/Imagenes/image.png)
+
+### **8.3. Vida del Jugador y Game Over**
+
+Cuando el jugador es golpeado por los enemigos, pierde salud, y si su salud llega a cero, el juego termina. En la siguiente imagen se muestra el **estado de salud** del jugador, justo antes de la finalización del juego.
+
+![Vida y Game Over](/Imagenes/image3.png)
+
+### **8.4. Bala en Acción**
+
+En esta captura, se muestra cómo una **bala** disparada por el jugador se aproxima a uno de los enemigos. Las balas tienen una vida útil limitada y desaparecerán al impactar con un enemigo o después de cierto tiempo.
+
+![Bala en Acción](/Imagenes/image4bala.png)
+
+---
+
+## **9. Conclusión**
 
 Este juego proporciona una buena base para un proyecto de FPS simple usando Ogre3D. Puedes extender las mecánicas agregando más tipos de enemigos, efectos visuales, y mejorando la jugabilidad.
 
 ---
 
-## **11. Créditos**
+## **10. Créditos**
 
 - **Desarrolladores**: Jesús David Romero Melo, Juan Camilo Torres Peña y Jonatan Alejandro Gallo Martínez.
 - **Correo**: jesus-romero@javeriana.edu.co, torrespjc@javeriana.edu.co y jonatan.gallo@javeriana.edu.co
