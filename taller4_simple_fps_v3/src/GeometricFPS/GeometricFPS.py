@@ -37,6 +37,30 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     self.m_Listener = FPSListener( self.getRoot( ), self )
     super( GeometricFPS, self ).setup( )
 
+
+  def _init_player(self, max_hp=100.0):
+    """Inicializa estado del jugador y temporizador simple."""
+    self.m_GameOver = False
+    self.m_Elapsed = 0.0           # acumulador de tiempo (segundos)
+    self.m_LastDamageTime = -999.0 # para cooldown de daño
+    self.m_Player = {"hp": float(max_hp), "max_hp": float(max_hp)}
+
+  def _apply_damage(self, amount: float):
+    """Aplica daño y verifica fin de juego."""
+    print('Applying damage: ', amount)
+    if self.m_GameOver:
+      return
+    print('Player HP: ', self.m_Player["hp"])
+    self.m_Player["hp"] = max(0.0, self.m_Player["hp"] - float(amount))
+    if self.m_Player["hp"] <= 0.0:
+      self._on_game_over()
+
+  def _on_game_over(self):
+    """Marca game over. El loop se detiene en frameRenderingQueued."""
+    self.m_GameOver = True
+    print(">>> GAME OVER <<<")
+
+
   def shootBullet( self ):
     if not self.m_AvailableNames['bullet']:
       print("No bullets available to shoot.")
@@ -81,9 +105,10 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
     # If you want it to face the same way as the camera:
     node.setOrientation(cam_orient)
     node.vector =  ( ( node.getPosition( ) - cam_pos ).normalisedCopy( ) ) * self.m_Bullets['bullet'][3]
+    # bala - camara para ir de la camara a la bala ( velocidad de la bala)
 
     # node.setPosition( cameraPosition[0], cameraPosition[1], cameraPosition[2] - 5)
-    self.m_AliveBullets.append({'node': node, 'name': name})
+    self.m_AliveBullets.append({'node': node, 'name': name, 'alive_time': 0})
 
   '''
   '''
@@ -162,12 +187,77 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
 
     # end if
   # end def
+    self._init_player(max_hp=100)
+  # end def
+
+  def handleBulletCollision(self, time_since_last_frame):
+    bullets_to_remove = []
+    for bullet in self.m_AliveBullets:
+      bullet['alive_time'] += time_since_last_frame
+      if bullet['alive_time'] > self.m_Bullets['bullet'][4]:
+        bullets_to_remove.append(bullet)
+        continue
+
+      for bad_guy_type in self.m_AliveBadGuys:
+        bad_guys_to_remove = []
+        for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
+          if bullet['node'].getPosition().distance(bad_guy['node'].getPosition()) < self.m_BadGuys[bad_guy_type][-1]:
+            bad_guy['stamina'] -= self.m_Bullets['bullet'][1]
+            bullets_to_remove.append(bullet)
+            if bad_guy['stamina'] <= 0:
+              print('Destroying bad guy: ', bad_guy['node'].getName())
+              bad_guys_to_remove.append(bad_guy)
+            break  # end if
+        # end for
+        for bad_guy in bad_guys_to_remove:
+          node = bad_guy['node']
+          self.m_SceneMgr.destroySceneNode(node)
+          self.m_AvailableNames[bad_guy_type].append(bad_guy['name'])
+          self.m_AliveBadGuys[bad_guy_type].remove(bad_guy)
+          self.m_SceneMgr.destroyManualObject(bad_guy['name'])
+        # end for
+    for bullet in bullets_to_remove:
+      node = bullet['node']
+      self.m_SceneMgr.destroySceneNode(node)
+      self.m_AvailableNames['bullet'].append(bullet['name'])
+      self.m_AliveBullets.remove(bullet)
+      self.m_SceneMgr.destroyManualObject(bullet['name'])
+  
+  def badGuyCollision(self):
+    DAMAGE = 10 
+    HIT_COOLDOWN = 1.0 # segundos\
+    for bad_guy_type in self.m_AliveBadGuys:
+      for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
+        cam = self.m_CamMan.getCamera()
+        cam_node = cam.getParentSceneNode()
+        cam_pos = cam.getPosition()
+
+        if bad_guy['node'].getPosition().distance(cam_pos) < self.m_BadGuys[bad_guy_type][-1]:
+          print('Bad guy hit camera')
+          if (self.m_Elapsed - self.m_LastDamageTime) >= HIT_COOLDOWN:
+            self._apply_damage(DAMAGE)
+            self.m_LastDamageTime = self.m_Elapsed
+            d = ( ( cam_pos - bad_guy['node'].getPosition( ) ).normalisedCopy( ) ) * 10
+            # bala - camara para ir de la camara a la bala ( velocidad de la bala)
+            cam.translate( d )
+          break
+        # end if
+      # end for
+    # end for
 
   '''
   '''
   # evt tiene un parametro para el tiempo entre frames
   def frameRenderingQueued( self, evt ):
     r = super( PUJ_Ogre.BaseApplication, self ).frameRenderingQueued( evt )
+
+    try:
+      self.m_Elapsed += float(evt.timeSinceLastFrame)
+    except Exception:
+      pass
+
+    if self.m_GameOver:
+      return False
 
     # Create bad guys
     for k in self.m_BadGuys:
@@ -216,34 +306,9 @@ class GeometricFPS( PUJ_Ogre.BaseApplicationWithVTK ):
       node = k['node']
       node.translate( node.vector)
     # end for
-
-    bullets_to_remove = []
-    for bullet in self.m_AliveBullets:
-      for bad_guy_type in self.m_AliveBadGuys:
-        bad_guys_to_remove = []
-        for bad_guy in self.m_AliveBadGuys[bad_guy_type]:
-          if bullet['node'].getPosition().distance(bad_guy['node'].getPosition()) < self.m_BadGuys[bad_guy_type][-1]:
-            bad_guy['stamina'] -= self.m_Bullets['bullet'][1]
-            bullets_to_remove.append(bullet)
-            if bad_guy['stamina'] <= 0:
-              print('Destroying bad guy: ', bad_guy['node'].getName())
-              bad_guys_to_remove.append(bad_guy)
-            break  # end if
-        # end for
-        for bad_guy in bad_guys_to_remove:
-          node = bad_guy['node']
-          self.m_SceneMgr.destroySceneNode(node)
-          self.m_AvailableNames[bad_guy_type].append(bad_guy['name'])
-          self.m_AliveBadGuys[bad_guy_type].remove(bad_guy)
-          self.m_SceneMgr.destroyManualObject(bad_guy['name'])
-        # end for
-    for bullet in bullets_to_remove:
-      node = bullet['node']
-      self.m_SceneMgr.destroySceneNode(node)
-      self.m_AvailableNames['bullet'].append(bullet['name'])
-      self.m_AliveBullets.remove(bullet)
-      self.m_SceneMgr.destroyManualObject(bullet['name'])
-    # end for
+    
+    self.handleBulletCollision(evt.timeSinceLastFrame)
+    self.badGuyCollision()
     return r
   # end def
 

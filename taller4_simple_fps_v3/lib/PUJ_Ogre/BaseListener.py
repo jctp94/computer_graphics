@@ -26,7 +26,6 @@ class BaseListener( OgreBites.InputListener ):
     if evt.keysym.sym == OgreBites.SDLK_ESCAPE:
       self.m_Root.queueEndRendering( )
     # end if
-    print( 'Key pressed: ' + str( evt.keysym.sym ) )
     return True
   # end def
 
