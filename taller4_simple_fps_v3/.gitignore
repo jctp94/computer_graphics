@@ -72,3 +72,4 @@ desktop.ini
 __pycache__/
 */__pycache__/*
 
+/src/GeometricFPS/ogrebullet
