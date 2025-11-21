@@ -242,6 +242,111 @@ class BaseApplicationWithVTK( BaseApplication ):
 
     return (P, N, T, C)
 
+  def _mecha(self, base=0.2, height=0.1, length=0.1):
+    """
+    Crea una 'mecha' como un prisma triangular invertido y
+    la devuelve en el formato (P, N, T, C) que usa _sphere/_wedge.
+
+    - base: ancho del triángulo (eje X)
+    - height: altura del triángulo (punta hacia -Y)
+    - length: profundidad a lo largo del eje Z
+    """
+    import vtk
+
+    # 1. Definir los 6 puntos de un wedge (prisma triangular)
+    #
+    # Visto de frente (eje X-Y):
+    #
+    #        (0, 0)
+    #       /     \
+    # (-b/2, 0)  (b/2, 0)
+    #        \
+    #        (0, -h)   ← punta hacia abajo
+    #
+    # Luego lo extruimos en Z (0 y length).
+    half_base = base * 0.5
+
+    points = vtk.vtkPoints()
+    # Triángulo "superior" (y = 0)
+    points.InsertNextPoint(-half_base, 0.0,       0.0)      # P0
+    points.InsertNextPoint( half_base, 0.0,       0.0)      # P1
+    points.InsertNextPoint( 0.0,      -height,    0.0)      # P2 (punta abajo)
+    # Triángulo "superior" extruido en Z
+    points.InsertNextPoint(-half_base, 0.0,       length)   # P3
+    points.InsertNextPoint( half_base, 0.0,       length)   # P4
+    points.InsertNextPoint( 0.0,      -height,    length)   # P5
+
+    # 2. Celda wedge
+    wedge = vtk.vtkWedge()
+    wedge.GetPointIds().SetId(0, 0)
+    wedge.GetPointIds().SetId(1, 1)
+    wedge.GetPointIds().SetId(2, 2)
+    wedge.GetPointIds().SetId(3, 3)
+    wedge.GetPointIds().SetId(4, 4)
+    wedge.GetPointIds().SetId(5, 5)
+
+    # 3. Centrar la geometría en el origen (más cómodo para rotar/posicionar)
+    #    Tomamos el bounding box de los puntos y lo llevamos al centro.
+    cx = 0.0
+    cy = -height * 0.5        # centro entre 0 y -height
+    cz = length * 0.5
+    for i in range(points.GetNumberOfPoints()):
+        x, y, z = points.GetPoint(i)
+        points.SetPoint(i, x - cx, y - cy, z - cz)
+
+    # 4. UnstructuredGrid
+    ugrid = vtk.vtkUnstructuredGrid()
+    ugrid.SetPoints(points)
+    ugrid.InsertNextCell(wedge.GetCellType(), wedge.GetPointIds())
+
+    # 5. Pasar a superficie
+    geom = vtk.vtkGeometryFilter()
+    geom.SetInputData(ugrid)
+    geom.Update()
+    poly = geom.GetOutput()
+
+    # 6. Normales
+    normals_gen = vtk.vtkPolyDataNormals()
+    normals_gen.SetInputData(poly)
+    normals_gen.ComputePointNormalsOn()
+    normals_gen.ComputeCellNormalsOff()
+    normals_gen.Update()
+    poly = normals_gen.GetOutput()
+
+    pts     = poly.GetPoints()
+    normals = poly.GetPointData().GetNormals()
+
+    # 7. Bounds para UVs simples (X-Z → u-v)
+    xmin, xmax, ymin, ymax, zmin, zmax = poly.GetBounds()
+    dx = xmax - xmin if xmax > xmin else 1.0
+    dz = zmax - zmin if zmax > zmin else 1.0
+
+    P = []
+    N = []
+    T = []
+    for i in range(pts.GetNumberOfPoints()):
+        x, y, z = pts.GetPoint(i)
+        P.append((x, y, z))
+
+        if normals is not None:
+            N.append(normals.GetTuple(i))
+        else:
+            N.append((0.0, 1.0, 0.0))
+
+        u = (x - xmin) / dx
+        v = (z - zmin) / dz
+        T.append((u, v))
+
+    # 8. Celdas
+    C = []
+    for i in range(poly.GetNumberOfCells()):
+        cell = poly.GetCell(i)
+        ids = []
+        for j in range(cell.GetNumberOfPoints()):
+            ids.append(cell.GetPointId(j))
+        C.append(ids)
+
+    return (P, N, T, C)
 # end class
 
 ## eof - BaseApplicationWithVTK.py
