@@ -13,6 +13,7 @@ import random
 import math
 import time
 from TejoListener import *
+import pygame
 
 """
 """
@@ -31,9 +32,15 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
   mecha_proportion = 0.06
   deep_hole_proportion = 0.0
   tejo_count = 0
+  camera_initial_position = [0, 1.7, 5]
+  last_tejo_scored = 0
+  score = 0
   '''
   '''
   def __init__( self ):
+    pygame.mixer.init()
+    self.sound_mecha = pygame.mixer.Sound("sonido/mecha_hit.wav")
+    self.metal_sound = pygame.mixer.Sound("sonido/metal_hit.mp3")
     super( MovingSpheres, self ).__init__( 'MovingSpheres v0.1', '' )
     self.m_ResourcesFile = os.path.join( cur_dir, 'resources.cfg' )
   # end def
@@ -58,7 +65,7 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     # Configure camera
     self._createCamera(
       top_speed = 3,
-      position = [ 0.00, 1.70, 5.0 ],
+      position = self.camera_initial_position,
       look_at = [ 0, 1.70, 0 ],
       background = [ 0.9, 0.75, 0.5 ],
       cam_style = OgreBites.CS_FREELOOK
@@ -70,21 +77,12 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     light.setDirection( [ 0, -1, 0 ] )
 
     # A ground
-    self._ground( 'ground', [ -4.00, 4.00, -4.00, 4.00 ] )
+    self._ground( 'ground', [ -1.00, 1.00, -4.00, 4.00 ] )
     ground_bullet = pybullet.createCollisionShape( pybullet.GEOM_PLANE, planeNormal = [ 0, 1, 0 ] )
     ground_body = pybullet.createMultiBody( 0, ground_bullet, -1, [ 0, 0, 0 ] )
     pybullet.changeDynamics( ground_body, -1, restitution = -0.5, lateralFriction = 20 )
     self.m_StaticBodies[ 'ground' ] = ground_body
 
-    # Load billiards
-    # red_ball = self._createManualObject(
-    #   self._sphere( 0.057, 50, 50 ), 'red_ball', 'red_material'
-    #   )
-    # red_ball.setPosition( 60, 0, 0 )
-    # red_ball_bullet = pybullet.createCollisionShape( pybullet.GEOM_SPHERE, radius = 0.057 )
-    # red_ball_body = pybullet.createMultiBody( 0.017, red_ball_bullet, -1, [ 2, 1, 0 ] )
-    # pybullet.changeDynamics( red_ball_body, -1, restitution = 0.5, lateralFriction = 0.3 )
-    # self.m_MovingBodies[ 'red_ball' ] = ( red_ball, red_ball_body )
    
     pit_incline_deg = 15.0
 
@@ -92,7 +90,6 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     theta_y = math.radians(-90.0)
     theta_z = math.radians(self.field_rotation_deg)
 
-    # qx, qy, qz, qw = pybullet.getQuaternionFromEuler([0, theta_y, theta_z])
 
     qy = pybullet.getQuaternionFromEuler([0, theta_y, 0])
     qz = pybullet.getQuaternionFromEuler([0, 0, theta_z])
@@ -106,12 +103,18 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     wedge_node = self._createManualObject(
         self._box(self.base, self.height,self.length),
         "tejo_wedge",
-        "debug_material"
+        "field"
     )
 
     wedge_node.setPosition(self.wx, self.wy, self.wz)
     wedge_node.setOrientation( Ogre.Quaternion(qx, qy, qz, qw) )
-    wedge_node.setVisible(True)
+
+    cylinder_node = self._createManualObject(
+        self._cylinder(0.3, 1.2),
+        "tejo_cylinder",
+        "backboard_wood"
+    )
+    cylinder_node.setPosition(0.0, 0.6, self.wz -0.8)
 
     # collider como BOX + rotación (no wedge)
     wedge_shape = pybullet.createCollisionShape(
@@ -119,9 +122,6 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
         halfExtents=[self.base * 0.5, self.height * 0.5, self.length * 0.5]
     )
 
-    # theta = math.radians(-pit_incline_deg)
-    # qx = math.sin(theta / 2.0)
-    # qw = math.cos(theta / 2.0)
 
     wedge_body = pybullet.createMultiBody(
         baseMass=0.0,  # estático
@@ -155,20 +155,25 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
 
     # Finish pybullet configuration
     pybullet.setPhysicsEngineParameter( numSolverIterations = 10 )
+
   # end def
 
   def createAllMechas(self):
     angle = math.radians(self.field_rotation_deg)
     mov_y = math.sin(angle) * self.bocin_gap
     mov_z = math.cos(angle) * self.bocin_gap 
-    initial_position = [self.wx, self.wy + (self.height / 2) - self.deep_hole_proportion, self.wz]
+    self.initial_position = [self.wx, self.wy + (self.height / 2) - self.deep_hole_proportion, self.wz]
+    
+    print("mov_y", mov_y)
+    print("mov_z", mov_z)
     
     positions = [
-      [initial_position[0] , initial_position[1] + mov_y, initial_position[2] + mov_z],
-      [initial_position[0] , initial_position[1] - mov_y, initial_position[2] - mov_z],
-      [initial_position[0] - self.bocin_gap, initial_position[1], initial_position[2] ],
-      [initial_position[0] + self.bocin_gap, initial_position[1], initial_position[2] ]
+      [self.initial_position[0] , self.initial_position[1] + mov_y, self.initial_position[2] + mov_z],
+      [self.initial_position[0] , self.initial_position[1] - mov_y, self.initial_position[2] - mov_z],
+      [self.initial_position[0] - self.bocin_gap, self.initial_position[1], self.initial_position[2] ],
+      [self.initial_position[0] + self.bocin_gap, self.initial_position[1], self.initial_position[2] ]
     ]
+    self.mecha_positions = positions
     for i in range(len(positions)):
       self.createMecha(positions[i], i )
 
@@ -180,7 +185,6 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     man.setMaterialName(0, "black_material")
 
   def createMecha(self, position, id):
-    pit_incline_deg = 15.0
 
     mecha_node = self._createManualObject(
         self._mecha(base=self.length * self.mecha_proportion, height=self.length * self.mecha_proportion * 0.86, length=self.length * self.mecha_proportion),
@@ -234,8 +238,50 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
 
   def getMechaContactPoints(self, body, mecha_name):
     return pybullet.getContactPoints(bodyA=body, bodyB=self.m_StaticBodies[mecha_name]['body'])       if self.m_StaticBodies[mecha_name]['available'] else []
-  '''
-  '''
+  
+  def collisionMecha(self, mecha_name):
+    self.sound_mecha.play()
+    print("Colisión con la mecha " + mecha_name)
+    self.highlight_mecha(mecha_name)
+    self.m_StaticBodies[mecha_name]['available'] = False
+    self.score += 3
+    self.printScore()
+
+  def checkBocin(self, tejo_pos):
+    x, y, z = tejo_pos  # Posición del tejo
+    m0, m1, m2, m3 = self.mecha_positions  # Centro de las mechas
+    # print("m0", m0)
+    # print("m1", m1)
+    # print("m2", m2)
+    # print("m3", m3)
+    # print("x", x)
+    # print("y", y)
+    # print("z", z)
+
+    condition_x = x >= m2[0] and x <= m3[0]
+    condition_y = y >= m1[0] and y <= m1[1]
+    condition_z = z >= m1[2] and z <= m0[2]
+    # Permite un margen de error (radio de bocin) para la mecha 1
+    # print("condition_x", condition_x)
+    # print("condition_y", condition_y)
+    # print("condition_z", condition_z)
+    return condition_x and condition_y and condition_z
+
+  def collisionBocin(self, name, tejo_pos):
+    print("collisionBocin------->", name, tejo_pos)
+    if self.checkBocin(tejo_pos):
+      print("BOCIN!!!!!!!!!!!!")
+      self.score += 6
+      self.printScore()
+      self.bocin_names.append(name)
+      return True
+    print("No es bocin")
+    self.last_tejo_scored = int(name[5])
+    return False
+  
+  def printScore(self):
+    print("Puntaje: " + str(self.score))
+    
   def frameRenderingQueued(self, evt):
     r = super(PUJ_Ogre.BaseApplicationWithVTK, self).frameRenderingQueued(evt)
 
@@ -248,7 +294,6 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
         node = info["node"]
         body = info["body"]
         aliveTime = info["aliveTime"]
-
         # Obtener posición real
         pos, orn = pybullet.getBasePositionAndOrientation(body)
         node.setPosition(pos)
@@ -264,44 +309,40 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
 
         if len(contacts_ground) > 0:
             print("Colisión con el suelo")
+            self.metal_sound.play()
             pybullet.resetBaseVelocity(body, [0,0,0], [0,0,0])
             pybullet.changeDynamics(body, -1, activationState=pybullet.ACTIVATION_STATE_SLEEP, mass=0.0)
-        collision_count = 0
+        
+        
         if len(contacts_mecha_0) > 0:
-            collision_count += 1
-            print("Colisión con la mecha 0")
-            self.highlight_mecha('mecha_0')
-            self.m_StaticBodies['mecha_0']['available'] = False
+          self.collisionMecha('mecha_0')
         if len(contacts_mecha_1) > 0:
-            collision_count += 1
-            print("Colisión con la mecha 1")
-            self.highlight_mecha('mecha_1')
-            self.m_StaticBodies['mecha_1']['available'] = False
+          self.collisionMecha('mecha_1')
         if len(contacts_mecha_2) > 0:
-            collision_count += 1
-            print("Colisión con la mecha 2")
-            self.highlight_mecha('mecha_2')
-            self.m_StaticBodies['mecha_2']['available'] = False
+          self.collisionMecha('mecha_2')
         if len(contacts_mecha_3) > 0:
-            collision_count += 1
-            print("Colisión con la mecha 3")
-            self.highlight_mecha('mecha_3')
-            self.m_StaticBodies['mecha_3']['available'] = False
+          self.collisionMecha('mecha_3')
+        mecha = True if len(contacts_mecha_0) + len(contacts_mecha_1) + len(contacts_mecha_2) + len(contacts_mecha_3) > 0 else False
+        
+        bocin = False
+        if (int(name[5]) > self.last_tejo_scored ):
+          bocin = self.collisionBocin(name, pos)
+
+        if mecha and bocin:
+          print("Monionaa")
+        
         if len(contacts) > 0:
-            # Quieto
-            pybullet.resetBaseVelocity(body, [0,0,0], [0,0,0])
-            pybullet.changeDynamics(body, -1, activationState=pybullet.ACTIVATION_STATE_SLEEP, mass=0.0)
-        if not (collision_count > 0):
-            now = time.time()
-            if now - aliveTime > 10:
-                print("Tejo eliminado")
-                pybullet.removeBody(body)
-                node.removeAndDestroyAllChildren()
-                self.m_SceneMgr.destroySceneNode(node)
-                tejo_to_remove.append(name)
+          pybullet.resetBaseVelocity(body, [0,0,0], [0,0,0])
+          pybullet.changeDynamics(body, -1, activationState=pybullet.ACTIVATION_STATE_SLEEP, mass=0.0)
+        now = time.time()
+        if now - aliveTime > 10:
+            print("Tejo eliminado")
+            pybullet.removeBody(body)
+            node.removeAndDestroyAllChildren()
+            self.m_SceneMgr.destroySceneNode(node)
+            tejo_to_remove.append(name)
 
     for name in tejo_to_remove:
-        print("Eliminando tejo: ", name)
         del self.m_MovingBodies[name]
         self.m_SceneMgr.destroyManualObject(name)
         
@@ -309,84 +350,95 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     
 
 
-    # for k in self.m_MovingBodies:
-    #   node, nId = self.m_MovingBodies[ k ]
-    #   pos, orn = pybullet.getBasePositionAndOrientation( nId )
-    #   node.setPosition( pos )
-    #   node.setOrientation( Ogre.Quaternion( orn[ 3 ], orn[ 0 ], orn[ 1 ], orn[ 2 ] ) )
-    # end for
+  def zoomIn(self):
+    self.m_CamMan.getCamera().setPosition(0, 1.7, -3)
+    self.m_CamMan.getCamera().lookAt(Ogre.Vector3(self.wx, self.wy, self.wz), Ogre.Node.TS_WORLD)
 
-    return r
-  # end def
-  def throwTejo(self, duration=None):
-    print("Throwing tejo")
-    object_id = len(self.m_MovingBodies)
-    name = 'red_ball_' + str(object_id)
-    # delete all manual objects with name 'red_ball_'
-    if self.m_SceneMgr.hasManualObject(name):
-        self.m_SceneMgr.destroyManualObject(name)
+  def zoomOut(self):
+    self.m_CamMan.getCamera().setPosition(0, 1.7, 5)
+    self.m_CamMan.getCamera().lookAt(Ogre.Vector3(0, 1.7, 0), Ogre.Node.TS_WORLD)
 
+  def resetGame(self):
+    self.score = 0
+    self.printScore()
+    for i in range(4):
+      self.m_StaticBodies['mecha_' + str(i)]['available'] = True
+      man = self.m_SceneMgr.getManualObject("mecha_" + str(i))
+      man.setMaterialName(0, "red_material")
 
-    # Nodo visual (Ogre)
-    red_ball = self._createManualObject(
-        self._sphere(0.057, 50, 50),
-        name,
-        'red_material'
-    )
-
-    # Posición inicial del tejo
+  def throwTejo(self, duration):
+    self.tejo_count+=1
+    # 1. Cámara
     cam = self.m_CamMan.getCamera()
+    cam_pos = cam._getDerivedPosition()
     cam_orient = cam._getDerivedOrientation()
-    qx, qy, qz, qw = cam_orient
-    world_pos = cam._getDerivedPosition()
-    x_position = world_pos.x
-    y_position = 1.7
-    z_position = world_pos.z
-    red_ball.setPosition(x_position, y_position, z_position)
 
-    # Collider (PyBullet)
-    radius = self.length * self.mecha_proportion * 0.5
-    red_ball_shape = pybullet.createCollisionShape(
-        pybullet.GEOM_SPHERE,
-        radius=radius
+    # 2. Posición inicial del tejo (un poquito delante de la cámara)
+    forward = cam_orient * Ogre.Vector3(0, 0, -1)
+    forward.normalise()
+    spawn_offset = 0.5
+    spawn_pos = cam_pos + forward * spawn_offset
+
+    x_position, y_position, z_position = spawn_pos.x, spawn_pos.y, spawn_pos.z
+
+    # 3. Crear nodo Ogre
+    name = f"tejo_{self.tejo_count}"
+
+    tejo_node = self._createManualObject(
+        self._cone(0.08, 0.03, 1.3),
+        name,
+        "tejo_metal_material"
     )
 
-    # Masa > 0 para que sea dinámico
-    mass = max(random.uniform(0.3, 2.0), 0.1)
+    tejo_node.setPosition(spawn_pos)
 
-    red_ball_body = pybullet.createMultiBody(
+    # 4. Collider PyBullet
+    mass = 0.017
+    tejo_shape = pybullet.createCollisionShape(
+        pybullet.GEOM_SPHERE, radius=0.057
+    )
+
+    tejo_body = pybullet.createMultiBody(
         baseMass=mass,
-        baseCollisionShapeIndex=red_ball_shape,
+        baseCollisionShapeIndex=tejo_shape,
         baseVisualShapeIndex=-1,
         basePosition=[x_position, y_position, z_position],
-        baseOrientation=[qx, qy, qz, qw]
+        baseOrientation=[cam_orient.x, cam_orient.y, cam_orient.z, cam_orient.w]
     )
 
     pybullet.changeDynamics(
-        red_ball_body, -1,
+        tejo_body, -1,
         restitution=0.5,
         lateralFriction=0.6
     )
 
-    # 👉 Velocidad inicial tipo "lanzamiento de tejo"
-    # vz = - duration * 5    # un poco de lado
-    vz = random.uniform(-12.0, -10.0)
-    vy = random.uniform(2.0, 6.0)       # arco hacia arriba
-    vx = 0     # hacia la cancha (z negativa)
- 
+    # 5. Velocidad según orientación de la cámara
+    base_speed = random.uniform(10.0, 12.0)
+    power = max(0.3, min(duration, 1.5))
+    speed = base_speed * power
+
+    arc = random.uniform(0.1, 0.3)  # arco hacia arriba
+    dir_with_arc = Ogre.Vector3(forward.x, forward.y + arc, forward.z)
+    dir_with_arc.normalise()
+
+    vx = dir_with_arc.x * speed
+    vy = dir_with_arc.y * speed
+    vz = dir_with_arc.z * speed
+
     pybullet.resetBaseVelocity(
-        red_ball_body,
+        tejo_body,
         linearVelocity=[vx, vy, vz]
     )
 
-    # Guardar solo lo que de verdad usamos luego
     self.m_MovingBodies[name] = {
-        "node": red_ball,
-        "body": red_ball_body,
+        "node": tejo_node,
+        "body": tejo_body,
         "aliveTime": time.time()
     }
-# end class
 
+  
+
+# end class
 
 """
 """

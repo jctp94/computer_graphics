@@ -29,12 +29,15 @@ class TejoListener( PUJ_Ogre.BaseListener ):
     # end def
 
     def keyPressed(self, evt):
-        print("Key pressed: ", evt.keysym.sym)
-        wasd = [119, 97, 115, 100]
+        if evt.keysym.sym == 122:
+            self.m_app.zoomIn()
+        elif evt.keysym.sym == 120:
+            self.m_app.zoomOut()
+        elif evt.keysym.sym == 114:
+            self.m_app.resetGame()
+        elif evt.keysym.sym == 112:
+            self.m_app.printScore()
         # bloquear WASD
-        print("Key pressed: ", evt.keysym.sym)
-        if evt.keysym.sym in wasd:
-            print("Key pressed wasd: ", evt.keysym)
-            return True
+        
         return super(TejoListener, self).keyPressed(evt)
 # end class
