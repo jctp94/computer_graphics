@@ -167,3 +167,18 @@ material ground
     }
   }
 }
+
+material bad_guy1
+{
+  technique
+  {
+    pass
+    {
+      cull_hardware none 
+      texture_unit 
+      {
+        texture ball.jpg
+      }
+    }
+  }
+}
