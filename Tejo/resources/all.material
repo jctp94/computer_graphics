@@ -162,8 +162,162 @@ material ground
     {
       texture_unit 
       {
-        texture ground.jpg
+        texture ground_1.jpg
       }
     }
   }
+}
+
+
+material debug_material
+{
+    technique
+    {
+        pass
+        {
+            diffuse 0 1 0 0.3
+            ambient 0 1 0
+            self_illumination 0 1 0
+            scene_blend alpha_blend
+            depth_write off
+        }
+    }
+}
+
+material field
+{
+  technique
+  {
+    pass
+    {
+      texture_unit 
+      {
+        texture arcilla.jpg
+      }
+    }
+  }
+}
+
+material tejo
+{
+  technique
+  {
+    pass
+    {
+      texture_unit 
+      {
+        texture tejo.jpg
+      }
+    }
+  }
+}
+
+material tejo_metal
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      lighting on
+
+      // Colores base (gris metal)
+      ambient  0.25 0.25 0.25 1.0
+      diffuse  0.7  0.7  0.7  1.0
+
+      // Brillo metálico fuerte (color del brillo + shininess)
+      specular 1.0 1.0 1.0 1.0 64
+
+      // El metal no emite luz por sí mismo
+      emissive 0.0 0.0 0.0 1.0
+
+      // Opcional: más parámetros “seguros”
+      depth_write on
+      depth_check on
+      cull_hardware clockwise
+      shading gouraud
+
+      // Textura difusa del tejo (si tienes una)
+      texture_unit
+      {
+        texture tejo.jpg
+      }
+
+      // OPCIONAL: mapa de entorno cúbico para reflejos falsos
+      // (necesitas un cubemap ya creado)
+      /*
+      texture_unit
+      {
+        cubic_texture metal_env.jpg combinedUVW
+        tex_coord_set 1
+        env_map cubic_reflection
+      }
+      */
+    }
+  }
+}
+
+
+material black_material {
+    receive_shadows on
+    technique {
+        pass {
+            lighting on
+            ambient 0.05 0.05 0.05 1.0
+            diffuse 0.02 0.02 0.02 1.0
+            specular 0.1 0.1 0.1 1.0 10.0
+            emissive 0.0 0.0 0.0 1.0
+            
+            alpha_to_coverage off 
+            colour_write on 
+            cull_hardware clockwise 
+            depth_check on 
+            depth_func less_equal 
+            depth_write on 
+            illumination_stage  
+            light_clip_planes off 
+            light_scissor off 
+            normalise_normals off 
+            polygon_mode solid 
+            scene_blend one zero 
+            scene_blend_op add 
+            shading gouraud 
+            transparent_sorting on 
+        }
+    }
+}
+
+material backboard_wood
+{
+    receive_shadows on
+
+    technique
+    {
+        pass
+        {
+            lighting on
+
+            // Colores base (ajústalos a tu gusto)
+            ambient  0.6 0.5 0.4 1.0
+            diffuse  0.7 0.6 0.5 1.0
+            specular 0.2 0.2 0.2 1.0 12.0
+            emissive 0 0 0 1.0
+
+            // Parámetros "clásicos" para que se vea bien
+            depth_check on
+            depth_write on
+            cull_hardware clockwise
+            shading gouraud
+
+            texture_unit
+            {
+                texture backboard_wood.jpg
+                // Opcional: mejora un poco la calidad
+                filtering anisotropic
+                max_anisotropy 8
+                tex_address_mode clamp
+            }
+        }
+    }
 }

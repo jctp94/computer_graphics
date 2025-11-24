@@ -28,6 +28,11 @@ class BaseListener( OgreBites.InputListener ):
     # end if
     return True
   # end def
+
+  def mousePressed( self, evt ):
+    print( 'Mouse button pressed: ' + str( evt.button ) )
+    return True
+  # end def
 # end class
 
 ## eof - BaseListener.py

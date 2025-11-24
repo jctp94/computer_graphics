@@ -66,7 +66,6 @@ class BaseApplicationWithVTK( BaseApplication ):
   def _createManualObject( self, data, name, material ):
 
     P, N, T, C = data
-
     man = self.m_SceneMgr.createManualObject( name )
     man.begin( material, Ogre.RenderOperation.OT_TRIANGLE_LIST )
 
@@ -85,7 +84,7 @@ class BaseApplicationWithVTK( BaseApplication ):
         man.quad( C[ i ][ 0 ], C[ i ][ 1 ], C[ i ][ 2 ], C[ i ][ 3 ] )
       # end if
     # end for
-
+    man.setMaterialName(0, material)
     man.end( )
     node = self.m_SceneMgr.getRootSceneNode( ).createChildSceneNode( )
     node.attachObject( man )
