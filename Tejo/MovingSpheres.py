@@ -44,6 +44,7 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     self.bocin_sound = pygame.mixer.Sound("sonido/bocin_hit.mp3")
     self.moniona_sound = pygame.mixer.Sound("sonido/moniona_hit.mp3")
     self.wood_sound = pygame.mixer.Sound("sonido/wood_hit.mp3")
+    self.paused = False
     super( MovingSpheres, self ).__init__( 'MovingSpheres v0.1', '' )
     self.m_ResourcesFile = os.path.join( cur_dir, 'resources.cfg' )
   # end def
@@ -188,6 +189,11 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     for i in range(len(positions)):
       self.createMecha(positions[i], i )
 
+  def togglePause(self):
+    self.paused = not self.paused
+    print("PAUSA:", self.paused)
+
+
   def highlight_mecha(self, mecha_name):
 
     # Obtener el objeto adjunto (ManualObject)
@@ -293,7 +299,8 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
     
   def frameRenderingQueued(self, evt):
     r = super(PUJ_Ogre.BaseApplicationWithVTK, self).frameRenderingQueued(evt)
-
+    if self.paused:
+      return r
     dt = evt.timeSinceLastFrame
     pybullet.setTimeStep(dt)
     pybullet.stepSimulation()
@@ -377,6 +384,10 @@ class MovingSpheres( PUJ_Ogre.BaseApplicationWithVTK ):
   def zoomOut(self):
     self.m_CamMan.getCamera().setPosition(0, 1.7, 5)
     self.m_CamMan.getCamera().lookAt(Ogre.Vector3(0, 1.7, 0), Ogre.Node.TS_WORLD)
+
+  def lateralView(self):
+    self.m_CamMan.getCamera().setPosition(-5, 1.7, 0)
+    self.m_CamMan.getCamera().lookAt(Ogre.Vector3(self.wx, self.wy, self.wz), Ogre.Node.TS_WORLD)
 
   def resetGame(self):
     self.score = 0
